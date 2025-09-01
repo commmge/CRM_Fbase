@@ -11,9 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
     <style>
-        /* Your existing CSS styles */
         :root {
             --primary: #2c3e50; --secondary: #34495e; --accent: #e74c3c; --light: #ecf0f1;
             --success: #2ecc71; --warning: #f39c12; --danger: #c0392b; --text: #333; --text-light: #fff;
@@ -38,6 +36,7 @@
         .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
         .btn-warning { background: var(--warning); color: white; }
+        .btn-info { background: #17a2b8; color: white; }
         .btn:hover { opacity: 0.9; transform: translateY(-2px); }
         .dashboard-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .card { background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 20px; }
@@ -68,7 +67,7 @@
         .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .chart-container { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; border-radius: 10px; width: 90%; max-width: 600px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: white; border-radius: 10px; width: 90%; max-width: 800px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
         .modal-title { font-size: 20px; font-weight: 600; }
         .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; }
@@ -88,6 +87,24 @@
         .notification { position: fixed; top: 20px; right: 20px; padding: 15px 20px; border-radius: 5px; background: var(--success); color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transform: translateX(120%); transition: transform 0.3s ease-in-out; z-index: 1100; }
         .notification.show { transform: translateX(0); }
         .mobile-menu-btn { display: none; background: var(--primary); color: white; border: none; border-radius: 5px; padding: 10px 15px; margin-bottom: 15px; cursor: pointer; position: fixed; top: 15px; left: 15px; z-index: 999; }
+        
+        /* Sales Funnel Styles */
+        .funnel-container { display: flex; flex-direction: column; gap: 20px; }
+        .funnel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .funnel-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .funnel-visualization { display: flex; flex-direction: column; gap: 15px; }
+        .funnel-stage { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .funnel-stage-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        .funnel-stage-title { font-weight: 600; font-size: 16px; }
+        .funnel-stage-count { background: var(--primary); color: white; padding: 3px 8px; border-radius: 12px; font-size: 12px; }
+        .funnel-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+        .funnel-item { background: #f8f9fa; border-radius: 6px; padding: 12px; border-left: 4px solid; }
+        .funnel-item-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .funnel-item-title { font-weight: 600; }
+        .funnel-item-details { font-size: 13px; color: #666; }
+        .funnel-item-progress { height: 6px; background: #e9ecef; border-radius: 3px; margin-top: 8px; overflow: hidden; }
+        .funnel-item-progress-bar { height: 100%; border-radius: 3px; }
+        
         @media (max-width: 992px) {
             .container { grid-template-columns: 1fr; }
             .sidebar { transform: translateX(-100%); z-index: 1000; }
@@ -95,6 +112,7 @@
             .main { grid-column: 1; margin-left: 0; padding-top: 70px; }
             .mobile-menu-btn { display: block; }
             .charts { grid-template-columns: 1fr; }
+            .funnel-items { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -158,7 +176,55 @@
                 </div>
             </div>
 
-            <div class="tab-content" id="sales-funnel"><div class="chart-container"><h3 class="card-header">Funil de Vendas por Etapa</h3><canvas id="funnelDetailChart"></canvas></div></div>
+            <div class="tab-content" id="sales-funnel">
+                <div class="funnel-container">
+                    <div class="funnel-header">
+                        <h2>Funil de Vendas Avançado</h2>
+                        <div class="action-buttons">
+                            <button class="btn btn-info" id="exportFunnelPdf"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+                            <button class="btn btn-success" id="exportFunnelXlsx"><i class="fas fa-file-excel"></i> Exportar XLSX</button>
+                        </div>
+                    </div>
+                    
+                    <div class="funnel-filters">
+                        <div class="filter-group">
+                            <label class="filter-label">Vendedor</label>
+                            <select class="filter-select" id="funnelSalesPersonFilter">
+                                <option value="">Todos os Vendedores</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Cliente</label>
+                            <select class="filter-select" id="funnelCustomerFilter">
+                                <option value="">Todos os Clientes</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Heatmap</label>
+                            <select class="filter-select" id="funnelHeatmapFilter">
+                                <option value="">Todos</option>
+                                <option value="1-3">Baixo (1-3)</option>
+                                <option value="4-7">Médio (4-7)</option>
+                                <option value="8-10">Alto (8-10)</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Data de Fechamento</label>
+                            <input type="date" class="filter-input" id="funnelClosingDateFilter">
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3 class="card-header">Visão Geral do Funil</h3>
+                        <canvas id="funnelOverviewChart"></canvas>
+                    </div>
+                    
+                    <div class="funnel-visualization" id="funnelStagesContainer">
+                        <!-- Funnel stages will be dynamically generated here -->
+                    </div>
+                </div>
+            </div>
+
             <div class="tab-content" id="kpis"><div class="card"><div class="card-header">Análise de KPIs<button class="btn btn-primary" id="exportKpisPdf"><i class="fas fa-file-pdf"></i> Exportar para PDF</button></div><div id="kpi-details-grid" class="kpi-grid"></div></div></div>
             <div class="tab-content" id="management">
                 <div class="tabs"><div class="tab active" data-subtab="sales-team">Equipe de Vendas</div><div class="tab" data-subtab="customers">Clientes</div></div>
@@ -182,9 +248,73 @@
         </div>
     </div>
 
-    <div class="modal" id="offerModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Adicionar/Editar Proposta</h3><button class="modal-close">&times;</button></div><form id="offerForm"><input type="hidden" id="editOfferId"><div class="form-group"><label class="form-label">Vendedor</label><select class="form-select" id="salesPersonSelect" required></select></div><div class="form-group"><label class="form-label">Cliente</label><select class="form-select" id="customerSelect" required></select></div><div class="form-group"><label class="form-label">Mercado</label><select class="form-select" id="marketSelect" required></select></div><div class="form-group"><label class="form-label">Valor da Proposta</label><input type="number" class="form-input" id="offerValueInput" required></div><div class="form-group"><label class="form-label">Data da Proposta</label><input type="date" class="form-input" id="offerDateInput" required></div><div class="form-group"><label class="form-label">Data Estimada de Fechamento</label><input type="date" class="form-input" id="closingDateInput" required></div><div class="form-group"><label class="form-label">Data de Lembrete</label><input type="date" class="form-input" id="reminderDateInput"></div><div class="form-group"><label class="form-label">Heatmap (1-10)</label><input type="number" class="form-input" id="heatmapInput" min="1" max="10" required></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="statusSelect" required></select></div><div class="form-group"><label class="form-label">Comentários</label><textarea class="form-textarea" id="commentsInput"></textarea></div><button type="submit" class="btn btn-primary">Salvar Proposta</button></form></div></div>
-    <div class="modal" id="salesPersonModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Adicionar/Editar Vendedor</h3><button class="modal-close">&times;</button></div><form id="salesPersonForm"><input type="hidden" id="editSalesPersonId"><div class="form-group"><label class="form-label">Nome</label><input type="text" class="form-input" id="salesPersonName" required></div><div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="salesPersonEmail" required></div><button type="submit" class="btn btn-primary">Salrar Vendedor</button></form></div></div>
-    <div class="modal" id="customerModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Adicionar/Editar Cliente</h3><button class="modal-close">&times;</button></div><form id="customerForm"><input type="hidden" id="editCustomerId"><div class="form-group"><label class="form-label">Nome</label><input type="text" class="form-input" id="customerName" required></div><div class="form-group"><label class="form-label">Setor</label><input type="text" class="form-input" id="customerIndustry" required></div><button type="submit', class="btn btn-primary">Salvar Cliente</button></form></div></div>
+    <div class="modal" id="offerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Adicionar/Editar Proposta</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="offerForm">
+                <input type="hidden" id="editOfferId">
+                <div class="form-group">
+                    <label class="form-label">Vendedor</label>
+                    <select class="form-select" id="salesPersonSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Cliente</label>
+                    <select class="form-select" id="customerSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mercado</label>
+                    <select class="form-select" id="marketSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Valor da Proposta</label>
+                    <input type="number" class="form-input" id="offerValueInput" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Data da Proposta</label>
+                    <input type="date" class="form-input" id="offerDateInput" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Data Estimada de Fechamento</label>
+                    <input type="date" class="form-input" id="closingDateInput" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Data de Lembrete</label>
+                    <input type="date" class="form-input" id="reminderDateInput">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Heatmap (1-10)</label>
+                    <input type="number" class="form-input" id="heatmapInput" min="1" max="10" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="statusSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Probabilidade de Fechamento (%)</label>
+                    <input type="number" class="form-input" id="probabilityInput" min="0" max="100" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Número de Visitas</label>
+                    <input type="number" class="form-input" id="visitsInput" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Número de Revisões da Proposta</label>
+                    <input type="number" class="form-input" id="revisionsInput" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Comentários</label>
+                    <textarea class="form-textarea" id="commentsInput"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar Proposta</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="salesPersonModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Adicionar/Editar Vendedor</h3><button class="modal-close">&times;</button></div><form id="salesPersonForm"><input type="hidden" id="editSalesPersonId"><div class="form-group"><label class="form-label">Nome</label><input type="text" class="form-input" id="salesPersonName" required></div><div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="salesPersonEmail" required></div><button type="submit" class="btn btn-primary">Salvar Vendedor</button></form></div></div>
+    <div class="modal" id="customerModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Adicionar/Editar Cliente</h3><button class="modal-close">&times;</button></div><form id="customerForm"><input type="hidden" id="editCustomerId"><div class="form-group"><label class="form-label">Nome</label><input type="text" class="form-input" id="customerName" required></div><div class="form-group"><label class="form-label">Setor</label><input type="text" class="form-input" id="customerIndustry" required></div><button type="submit" class="btn btn-primary">Salvar Cliente</button></form></div></div>
 
     <div class="notification" id="notification"></div>
 
@@ -209,8 +339,25 @@
         let sortState = { column: 'offerNumber', direction: 'asc' };
         
         const MARKETS = ['Conforto', 'Industrial', 'Precisão', 'Hospitalar', 'Data Center', 'Produtos Customizados'];
-        const STATUSES = {'aberto': 'Aberto', 'cotação': 'Cotação', 'negociação': 'Negociação Final', 'fechado': 'Fechado', 'perdido': 'Perdido'};
+        const STATUSES = {
+            'prospecção': 'Prospecção', 
+            'qualificação': 'Qualificação', 
+            'proposta': 'Proposta', 
+            'negociação': 'Negociação', 
+            'fechado': 'Fechado', 
+            'perdido': 'Perdido'
+        };
         const HEATMAP_RANGES = { '': 'Todos', '1-3': 'Baixo (1-3)', '4-7': 'Médio (4-7)', '8-10': 'Alto (8-10)' };
+        
+        // Colors for each stage in the funnel
+        const STAGE_COLORS = {
+            'prospecção': '#3498db',
+            'qualificação': '#9b59b6',
+            'proposta': '#f1c40f',
+            'negociação': '#e67e22',
+            'fechado': '#2ecc71',
+            'perdido': '#e74c3c'
+        };
 
         // --- FUNÇÕES DE BANCO DE DADOS (FIRESTORE) ---
         async function loadDb() {
@@ -254,6 +401,7 @@
             updateAllCharts();
             updateKPIs('kpi-grid-reports');
             renderKpiPage();
+            renderSalesFunnel();
         }
         
         function populateSelect(elementId, data, options = {}) {
@@ -286,6 +434,10 @@
             populateSelect('customerSelect', db.customers, { placeholder: 'Selecione um Cliente' });
             populateStaticSelect('marketSelect', MARKETS, 'Selecione um Mercado');
             populateStaticSelect('statusSelect', STATUSES, 'Selecione um Status');
+            
+            // Funnel filters
+            populateSelect('funnelSalesPersonFilter', db.salesTeam, { placeholder: 'Todos os Vendedores' });
+            populateSelect('funnelCustomerFilter', db.customers, { placeholder: 'Todos os Clientes' });
         }
 
         function renderOffersTable() {
@@ -418,7 +570,7 @@
 
         function updateAllCharts() {
             const funnelData = Object.keys(STATUSES).map(status => db.offers.filter(o => o.status === status).length);
-            createOrUpdateChart('funnelDetailChart', 'bar', { labels: Object.values(STATUSES), datasets: [{ label: '# de Propostas', data: funnelData, backgroundColor: ['#f39c12', '#3498db', '#8e44ad', '#2ecc71', '#e74c3c'] }] }, { indexAxis: 'y', responsive: true });
+            createOrUpdateChart('funnelDetailChart', 'bar', { labels: Object.values(STATUSES), datasets: [{ label: '# de Propostas', data: funnelData, backgroundColor: ['#3498db', '#9b59b6', '#f1c40f', '#e67e22', '#2ecc71', '#e74c3c'] }] }, { indexAxis: 'y', responsive: true });
             const marketData = MARKETS.map(market => db.offers.filter(o => o.market === market).reduce((sum, o) => sum + o.value, 0));
             createOrUpdateChart('marketChart', 'pie', { labels: MARKETS, datasets: [{ label: 'Vendas por Mercado', data: marketData, backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#e74c3c', '#9b59b6', '#1abc9c'] }] }, { responsive: true });
             const salesPersonData = db.salesTeam.map(p => db.offers.filter(o => o.salesPersonId === p.id && o.status === 'fechado').reduce((sum, o) => sum + o.value, 0));
@@ -458,6 +610,160 @@
                 kpiGrid.appendChild(card);
             });
         }
+        
+        // Enhanced Sales Funnel Rendering
+        function renderSalesFunnel() {
+            const funnelContainer = document.getElementById('funnelStagesContainer');
+            if (!funnelContainer) return;
+            
+            // Get filter values
+            const salesPersonFilter = document.getElementById('funnelSalesPersonFilter').value;
+            const customerFilter = document.getElementById('funnelCustomerFilter').value;
+            const heatmapFilter = document.getElementById('funnelHeatmapFilter').value;
+            const closingDateFilter = document.getElementById('funnelClosingDateFilter').value;
+            
+            // Filter offers based on criteria
+            let filteredOffers = db.offers.filter(offer => {
+                const heatmapMatch = !heatmapFilter || 
+                    (heatmapFilter === '1-3' && offer.heatmap <= 3) ||
+                    (heatmapFilter === '4-7' && offer.heatmap >= 4 && offer.heatmap <= 7) ||
+                    (heatmapFilter === '8-10' && offer.heatmap >= 8);
+                
+                const closingDateMatch = !closingDateFilter || offer.closingDate === closingDateFilter;
+                
+                return (!salesPersonFilter || offer.salesPersonId === salesPersonFilter) &&
+                       (!customerFilter || offer.customerId === customerFilter) &&
+                       heatmapMatch &&
+                       closingDateMatch;
+            });
+            
+            // Update funnel overview chart
+            updateFunnelOverviewChart(filteredOffers);
+            
+            // Clear previous content
+            funnelContainer.innerHTML = '';
+            
+            // Create a stage for each status
+            Object.entries(STATUSES).forEach(([statusKey, statusLabel]) => {
+                const stageOffers = filteredOffers.filter(offer => offer.status === statusKey);
+                
+                const stageElement = document.createElement('div');
+                stageElement.className = 'funnel-stage';
+                stageElement.innerHTML = `
+                    <div class="funnel-stage-header">
+                        <div class="funnel-stage-title">${statusLabel}</div>
+                        <div class="funnel-stage-count">${stageOffers.length}</div>
+                    </div>
+                    <div class="funnel-items">
+                        ${stageOffers.map(offer => renderFunnelItem(offer)).join('')}
+                    </div>
+                `;
+                
+                funnelContainer.appendChild(stageElement);
+            });
+        }
+        
+        function renderFunnelItem(offer) {
+            const salesPerson = getById(db.salesTeam, offer.salesPersonId)?.name || 'N/A';
+            const customer = getById(db.customers, offer.customerId)?.name || 'N/A';
+            
+            // Calculate expected value based on probability
+            const expectedValue = offer.value * (offer.probability / 100);
+            
+            // Determine heatmap color
+            let heatmapColor;
+            if (offer.heatmap >= 8) heatmapColor = '#2ecc71';
+            else if (offer.heatmap >= 4) heatmapColor = '#f39c12';
+            else heatmapColor = '#e74c3c';
+            
+            return `
+                <div class="funnel-item" style="border-left-color: ${STAGE_COLORS[offer.status] || '#ccc'}">
+                    <div class="funnel-item-header">
+                        <div class="funnel-item-title">${customer}</div>
+                        <div>${formatCurrency(offer.value)}</div>
+                    </div>
+                    <div class="funnel-item-details">
+                        <div>Vendedor: ${salesPerson}</div>
+                        <div>Heatmap: ${offer.heatmap}/10</div>
+                        <div>Probabilidade: ${offer.probability || 0}%</div>
+                        <div>Visitas: ${offer.visits || 0}</div>
+                        <div>Revisões: ${offer.revisions || 0}</div>
+                        <div>Fechamento: ${offer.closingDate ? new Date(offer.closingDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'}</div>
+                    </div>
+                    <div class="funnel-item-progress">
+                        <div class="funnel-item-progress-bar" style="width: ${offer.probability || 0}%; background-color: ${heatmapColor};"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function updateFunnelOverviewChart(offers) {
+            const stageCounts = {};
+            Object.keys(STATUSES).forEach(status => {
+                stageCounts[status] = offers.filter(offer => offer.status === status).length;
+            });
+            
+            const expectedValues = {};
+            Object.keys(STATUSES).forEach(status => {
+                expectedValues[status] = offers
+                    .filter(offer => offer.status === status)
+                    .reduce((sum, offer) => sum + (offer.value * (offer.probability / 100)), 0);
+            });
+            
+            const ctx = document.getElementById('funnelOverviewChart').getContext('2d');
+            if (charts['funnelOverviewChart']) {
+                charts['funnelOverviewChart'].destroy();
+            }
+            
+            charts['funnelOverviewChart'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.values(STATUSES),
+                    datasets: [
+                        {
+                            label: 'Número de Oportunidades',
+                            data: Object.values(stageCounts),
+                            backgroundColor: Object.keys(STATUSES).map(status => STAGE_COLORS[status]),
+                            yAxisID: 'y',
+                        },
+                        {
+                            label: 'Valor Esperado (R$)',
+                            data: Object.values(expectedValues),
+                            backgroundColor: '#2c3e50',
+                            type: 'line',
+                            yAxisID: 'y1',
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Número de Oportunidades'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Valor Esperado (R$)'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
         function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
@@ -474,7 +780,10 @@
             document.getElementById('reminderDateInput').value = offer.reminderDate;
             document.getElementById('heatmapInput').value = offer.heatmap;
             document.getElementById('statusSelect').value = offer.status;
-            document.getElementById('commentsInput').value = offer.comments;
+            document.getElementById('probabilityInput').value = offer.probability || 0;
+            document.getElementById('visitsInput').value = offer.visits || 0;
+            document.getElementById('revisionsInput').value = offer.revisions || 0;
+            document.getElementById('commentsInput').value = offer.comments || '';
             openModal('offerModal');
         };
 
@@ -507,6 +816,9 @@
                 reminderDate: document.getElementById('reminderDateInput').value,
                 heatmap: parseInt(document.getElementById('heatmapInput').value),
                 status: document.getElementById('statusSelect').value,
+                probability: parseInt(document.getElementById('probabilityInput').value) || 0,
+                visits: parseInt(document.getElementById('visitsInput').value) || 0,
+                revisions: parseInt(document.getElementById('revisionsInput').value) || 0,
                 comments: document.getElementById('commentsInput').value,
             };
             try {
@@ -572,7 +884,20 @@
 
         document.getElementById('exportXlsxBtn').addEventListener('click', () => {
             const offersSheet = db.offers.map(o => ({
-                'Proposta #': o.offerNumber, 'Vendedor': getById(db.salesTeam, o.salesPersonId)?.name || 'N/A', 'Cliente': getById(db.customers, o.customerId)?.name || 'N/A', 'Mercado': o.market, 'Valor': o.value, 'Data da Proposta': o.offerDate, 'Data de Fechamento': o.closingDate, 'Heatmap': o.heatmap, 'Status': o.status, 'Lembrete': o.reminderDate, 'Comentários': o.comments
+                'Proposta #': o.offerNumber, 
+                'Vendedor': getById(db.salesTeam, o.salesPersonId)?.name || 'N/A', 
+                'Cliente': getById(db.customers, o.customerId)?.name || 'N/A', 
+                'Mercado': o.market, 
+                'Valor': o.value, 
+                'Data da Proposta': o.offerDate, 
+                'Data de Fechamento': o.closingDate, 
+                'Heatmap': o.heatmap, 
+                'Status': o.status, 
+                'Probabilidade': o.probability || 0,
+                'Visitas': o.visits || 0,
+                'Revisões': o.revisions || 0,
+                'Lembrete': o.reminderDate, 
+                'Comentários': o.comments
             }));
             const wb = XLSX.utils.book_new();
             const wsOffers = XLSX.utils.json_to_sheet(offersSheet);
@@ -596,109 +921,367 @@
         
         document.getElementById('importXlsxBtn').addEventListener('click', () => {
             const input = document.createElement('input');
-            input.type = 'file'; input.accept = '.xlsx, .xls';
+            input.type = 'file';
+            input.accept = '.xlsx, .xls';
             input.onchange = e => {
-                const file = e.target.files[0]; const reader = new FileReader();
+                const file = e.target.files[0];
+                const reader = new FileReader();
                 reader.onload = async (event) => {
                     if (!confirm("Atenção: A importação irá APAGAR TODOS os dados existentes. Deseja continuar?")) return;
+                    
                     try {
-                        showNotification("Iniciando importação..."); await clearAllData();
+                        showNotification("Iniciando importação...");
+                        
+                        // Clear existing data first
+                        await clearAllData();
+                        
                         const data = new Uint8Array(event.target.result);
                         const workbook = XLSX.read(data, {type: 'array'});
-                        const salesTeamData = XLSX.utils.sheet_to_json(workbook.Sheets['Vendedores']);
-                        const customersData = XLSX.utils.sheet_to_json(workbook.Sheets['Clientes']);
-                        const offersData = XLSX.utils.sheet_to_json(workbook.Sheets['Ofertas']);
                         
+                        // Check if required sheets exist
+                        if (!workbook.Sheets['Vendedores'] || !workbook.Sheets['Clientes'] || !workbook.Sheets['Ofertas']) {
+                            throw new Error("O arquivo Excel deve conter as planilhas: Vendedores, Clientes e Ofertas");
+                        }
+                        
+                        // Import sales team
+                        const salesTeamData = XLSX.utils.sheet_to_json(workbook.Sheets['Vendedores']);
                         const salesTeamMap = {};
                         for (const person of salesTeamData) {
-                            const docRef = await firestore.collection('salesTeam').add({ name: person.name, email: person.email });
+                            if (!person.name || !person.email) {
+                                console.warn("Vendedor inválido ignorado:", person);
+                                continue;
+                            }
+                            const docRef = await firestore.collection('salesTeam').add({
+                                name: person.name,
+                                email: person.email
+                            });
                             salesTeamMap[person.name] = docRef.id;
                         }
+                        
+                        // Import customers
+                        const customersData = XLSX.utils.sheet_to_json(workbook.Sheets['Clientes']);
                         const customersMap = {};
                         for (const customer of customersData) {
-                             const docRef = await firestore.collection('customers').add({ name: customer.name, industry: customer.industry });
-                             customersMap[customer.name] = docRef.id;
+                            if (!customer.name || !customer.industry) {
+                                console.warn("Cliente inválido ignorado:", customer);
+                                continue;
+                            }
+                            const docRef = await firestore.collection('customers').add({
+                                name: customer.name,
+                                industry: customer.industry
+                            });
+                            customersMap[customer.name] = docRef.id;
                         }
+                        
+                        // Import offers
+                        const offersData = XLSX.utils.sheet_to_json(workbook.Sheets['Ofertas']);
                         const batch = firestore.batch();
-                        offersData.forEach(offer => {
+                        
+                        for (const offer of offersData) {
+                            // Validate required fields
+                            if (!offer['Proposta #'] || !offer['Vendedor'] || !offer['Cliente'] || 
+                                !offer['Mercado'] || !offer['Valor'] || !offer['Status']) {
+                                console.warn("Proposta inválida ignorada:", offer);
+                                continue;
+                            }
+                            
+                            // Get references to sales person and customer
+                            const salesPersonId = salesTeamMap[offer['Vendedor']];
+                            const customerId = customersMap[offer['Cliente']];
+                            
+                            if (!salesPersonId || !customerId) {
+                                console.warn("Vendedor ou cliente não encontrado para proposta:", offer);
+                                continue;
+                            }
+                            
                             const newOfferRef = firestore.collection('offers').doc();
                             const offerPayload = {
-                                offerNumber: offer['Proposta #'], salesPersonId: salesTeamMap[offer['Vendedor']], customerId: customersMap[offer['Cliente']], market: offer['Mercado'], value: offer['Valor'], offerDate: offer['Data da Proposta'], closingDate: offer['Data de Fechamento'], heatmap: offer['Heatmap'], status: offer['Status'], reminderDate: offer['Lembrete'] || '', comments: offer['Comentários'] || ''
+                                offerNumber: offer['Proposta #'],
+                                salesPersonId: salesPersonId,
+                                customerId: customerId,
+                                market: offer['Mercado'],
+                                value: parseFloat(offer['Valor']),
+                                offerDate: offer['Data da Proposta'] || '',
+                                closingDate: offer['Data de Fechamento'] || '',
+                                heatmap: parseInt(offer['Heatmap']) || 5,
+                                status: offer['Status'].toLowerCase(),
+                                probability: parseInt(offer['Probabilidade']) || 0,
+                                visits: parseInt(offer['Visitas']) || 0,
+                                revisions: parseInt(offer['Revisões']) || 0,
+                                reminderDate: offer['Lembrete'] || '',
+                                comments: offer['Comentários'] || ''
                             };
+                            
                             batch.set(newOfferRef, offerPayload);
-                        });
+                        }
+                        
                         await batch.commit();
-                        showNotification('Importação concluída com sucesso!'); loadDb();
-                    } catch (err) { showNotification('Erro na importação. Verifique o formato do arquivo e o console.', true); console.error("Erro de importação: ", err); }
+                        showNotification('Importação concluída com sucesso!');
+                        loadDb();
+                    } catch (err) {
+                        console.error("Erro de importação: ", err);
+                        showNotification('Erro na importação: ' + err.message, true);
+                    }
                 };
                 reader.readAsArrayBuffer(file);
             };
             input.click();
         });
 
-        // FIXED: clearCollection function
-        async function clearCollection(collectionName) {
-            try {
-                showNotification(`Limpando coleção ${collectionName}...`);
-                const snapshot = await firestore.collection(collectionName).get();
+        // Export Funnel to XLSX
+        document.getElementById('exportFunnelXlsx').addEventListener('click', () => {
+            // Get filter values
+            const salesPersonFilter = document.getElementById('funnelSalesPersonFilter').value;
+            const customerFilter = document.getElementById('funnelCustomerFilter').value;
+            const heatmapFilter = document.getElementById('funnelHeatmapFilter').value;
+            const closingDateFilter = document.getElementById('funnelClosingDateFilter').value;
+            
+            // Filter offers based on criteria
+            let filteredOffers = db.offers.filter(offer => {
+                const heatmapMatch = !heatmapFilter || 
+                    (heatmapFilter === '1-3' && offer.heatmap <= 3) ||
+                    (heatmapFilter === '4-7' && offer.heatmap >= 4 && offer.heatmap <= 7) ||
+                    (heatmapFilter === '8-10' && offer.heatmap >= 8);
                 
-                // Firestore has a limit of 500 operations per batch
-                const batchSize = 400;
-                let processed = 0;
+                const closingDateMatch = !closingDateFilter || offer.closingDate === closingDateFilter;
                 
-                while (processed < snapshot.size) {
-                    const batch = firestore.batch();
-                    const batchDocs = snapshot.docs.slice(processed, processed + batchSize);
-                    
-                    batchDocs.forEach(doc => {
-                        batch.delete(doc.ref);
-                    });
-                    
-                    await batch.commit();
-                    processed += batchDocs.length;
-                    showNotification(`Processados ${processed} de ${snapshot.size} documentos em ${collectionName}...`);
+                return (!salesPersonFilter || offer.salesPersonId === salesPersonFilter) &&
+                       (!customerFilter || offer.customerId === customerFilter) &&
+                       heatmapMatch &&
+                       closingDateMatch;
+            });
+            
+            const funnelSheet = filteredOffers.map(o => ({
+                'Proposta #': o.offerNumber, 
+                'Vendedor': getById(db.salesTeam, o.salesPersonId)?.name || 'N/A', 
+                'Cliente': getById(db.customers, o.customerId)?.name || 'N/A', 
+                'Mercado': o.market, 
+                'Valor': o.value, 
+                'Valor Esperado': o.value * (o.probability / 100),
+                'Data da Proposta': o.offerDate, 
+                'Data de Fechamento': o.closingDate, 
+                'Heatmap': o.heatmap, 
+                'Status': STATUSES[o.status] || o.status, 
+                'Probabilidade': o.probability || 0,
+                'Visitas': o.visits || 0,
+                'Revisões': o.revisions || 0,
+                'Lembrete': o.reminderDate, 
+                'Comentários': o.comments
+            }));
+            
+            const wb = XLSX.utils.book_new();
+            const wsFunnel = XLSX.utils.json_to_sheet(funnelSheet);
+            XLSX.utils.book_append_sheet(wb, wsFunnel, "Funil de Vendas");
+            XLSX.writeFile(wb, "funil_vendas.xlsx");
+            showNotification("Funil exportado para XLSX!");
+        });
+        
+        // Export Funnel to PDF
+        document.getElementById('exportFunnelPdf').addEventListener('click', async () => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            
+            // Add title
+            pdf.setFontSize(20);
+            pdf.text('Relatório do Funil de Vendas', 105, 15, { align: 'center' });
+            
+            // Add date
+            pdf.setFontSize(12);
+            pdf.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 105, 22, { align: 'center' });
+            
+            // Add filters info
+            const salesPersonFilter = document.getElementById('funnelSalesPersonFilter');
+            const customerFilter = document.getElementById('funnelCustomerFilter');
+            const heatmapFilter = document.getElementById('funnelHeatmapFilter');
+            const closingDateFilter = document.getElementById('funnelClosingDateFilter');
+            
+            let filtersText = 'Filtros aplicados: ';
+            if (salesPersonFilter.value) filtersText += `Vendedor: ${salesPersonFilter.options[salesPersonFilter.selectedIndex].text}, `;
+            if (customerFilter.value) filtersText += `Cliente: ${customerFilter.options[customerFilter.selectedIndex].text}, `;
+            if (heatmapFilter.value) filtersText += `Heatmap: ${heatmapFilter.options[heatmapFilter.selectedIndex].text}, `;
+            if (closingDateFilter.value) filtersText += `Data de Fechamento: ${closingDateFilter.value}, `;
+            
+            if (filtersText === 'Filtros aplicados: ') {
+                filtersText += 'Nenhum filtro aplicado';
+            } else {
+                filtersText = filtersText.slice(0, -2); // Remove trailing comma and space
+            }
+            
+            pdf.setFontSize(10);
+            pdf.text(filtersText, 105, 29, { align: 'center', maxWidth: 250 });
+            
+            // Add chart image
+            const canvas = document.getElementById('funnelOverviewChart');
+            const chartImage = await html2canvas(canvas);
+            const imgData = chartImage.toDataURL('image/png');
+            pdf.addImage(imgData, 'PNG', 15, 35, 260, 80);
+            
+            // Add stage statistics
+            let yPosition = 125;
+            pdf.setFontSize(14);
+            pdf.text('Resumo por Estágio', 15, yPosition);
+            yPosition += 8;
+            
+            // Get filter values
+            const salesPersonFilterVal = salesPersonFilter.value;
+            const customerFilterVal = customerFilter.value;
+            const heatmapFilterVal = heatmapFilter.value;
+            const closingDateFilterVal = closingDateFilter.value;
+            
+            // Filter offers based on criteria
+            let filteredOffers = db.offers.filter(offer => {
+                const heatmapMatch = !heatmapFilterVal || 
+                    (heatmapFilterVal === '1-3' && offer.heatmap <= 3) ||
+                    (heatmapFilterVal === '4-7' && offer.heatmap >= 4 && offer.heatmap <= 7) ||
+                    (heatmapFilterVal === '8-10' && offer.heatmap >= 8);
+                
+                const closingDateMatch = !closingDateFilterVal || offer.closingDate === closingDateFilterVal;
+                
+                return (!salesPersonFilterVal || offer.salesPersonId === salesPersonFilterVal) &&
+                       (!customerFilterVal || offer.customerId === customerFilterVal) &&
+                       heatmapMatch &&
+                       closingDateMatch;
+            });
+            
+            // Calculate stage statistics
+            const stageStats = {};
+            Object.keys(STATUSES).forEach(status => {
+                const stageOffers = filteredOffers.filter(offer => offer.status === status);
+                stageStats[status] = {
+                    count: stageOffers.length,
+                    totalValue: stageOffers.reduce((sum, offer) => sum + offer.value, 0),
+                    expectedValue: stageOffers.reduce((sum, offer) => sum + (offer.value * (offer.probability / 100)), 0)
+                };
+            });
+            
+            // Add stage statistics table
+            pdf.setFontSize(10);
+            pdf.text('Estágio', 15, yPosition);
+            pdf.text('Oportunidades', 60, yPosition);
+            pdf.text('Valor Total', 100, yPosition);
+            pdf.text('Valor Esperado', 140, yPosition);
+            pdf.text('Taxa de Conversão', 180, yPosition);
+            yPosition += 5;
+            
+            // Draw line
+            pdf.line(15, yPosition, 200, yPosition);
+            yPosition += 5;
+            
+            let totalValue = 0;
+            let totalExpected = 0;
+            
+            Object.entries(STATUSES).forEach(([statusKey, statusLabel]) => {
+                const stats = stageStats[statusKey];
+                totalValue += stats.totalValue;
+                totalExpected += stats.expectedValue;
+                
+                pdf.text(statusLabel, 15, yPosition);
+                pdf.text(stats.count.toString(), 60, yPosition);
+                pdf.text(formatCurrency(stats.totalValue), 100, yPosition);
+                pdf.text(formatCurrency(stats.expectedValue), 140, yPosition);
+                
+                // Calculate conversion rate (for stages before "fechado")
+                if (statusKey !== 'fechado' && statusKey !== 'perdido') {
+                    const nextStage = Object.keys(STATUSES)[Object.keys(STATUSES).indexOf(statusKey) + 1];
+                    if (nextStage && stageStats[nextStage]) {
+                        const conversionRate = stats.count > 0 ? (stageStats[nextStage].count / stats.count * 100).toFixed(1) : 0;
+                        pdf.text(`${conversionRate}%`, 180, yPosition);
+                    } else {
+                        pdf.text('N/A', 180, yPosition);
+                    }
+                } else {
+                    pdf.text('N/A', 180, yPosition);
                 }
                 
-                return true;
-            } catch (error) {
-                console.error(`Erro ao limpar a coleção ${collectionName}:`, error);
-                showNotification(`Erro ao limpar a coleção ${collectionName}. Verifique o console.`, true);
-                return false;
+                yPosition += 6;
+            });
+            
+            // Add totals
+            yPosition += 3;
+            pdf.setFontSize(11);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('TOTAL', 15, yPosition);
+            pdf.text(filteredOffers.length.toString(), 60, yPosition);
+            pdf.text(formatCurrency(totalValue), 100, yPosition);
+            pdf.text(formatCurrency(totalExpected), 140, yPosition);
+            pdf.setFont(undefined, 'normal');
+            
+            // Add key opportunities
+            yPosition += 15;
+            if (yPosition > 270) {
+                pdf.addPage();
+                yPosition = 20;
             }
+            
+            pdf.setFontSize(14);
+            pdf.text('Principais Oportunidades', 15, yPosition);
+            yPosition += 8;
+            
+            // Get top 5 opportunities by expected value
+            const topOpportunities = filteredOffers
+                .filter(o => o.status !== 'fechado' && o.status !== 'perdido')
+                .sort((a, b) => (b.value * (b.probability / 100)) - (a.value * (a.probability / 100)))
+                .slice(0, 5);
+            
+            if (topOpportunities.length > 0) {
+                pdf.setFontSize(10);
+                pdf.text('Cliente', 15, yPosition);
+                pdf.text('Vendedor', 60, yPosition);
+                pdf.text('Valor', 100, yPosition);
+                pdf.text('Prob.', 130, yPosition);
+                pdf.text('Valor Esperado', 150, yPosition);
+                pdf.text('Fechamento', 190, yPosition);
+                yPosition += 5;
+                
+                // Draw line
+                pdf.line(15, yPosition, 200, yPosition);
+                yPosition += 5;
+                
+                topOpportunities.forEach(offer => {
+                    const salesPerson = getById(db.salesTeam, offer.salesPersonId)?.name || 'N/A';
+                    const customer = getById(db.customers, offer.customerId)?.name || 'N/A';
+                    const expectedValue = offer.value * (offer.probability / 100);
+                    
+                    pdf.text(customer, 15, yPosition);
+                    pdf.text(salesPerson, 60, yPosition);
+                    pdf.text(formatCurrency(offer.value), 100, yPosition);
+                    pdf.text(`${offer.probability}%`, 130, yPosition);
+                    pdf.text(formatCurrency(expectedValue), 150, yPosition);
+                    pdf.text(offer.closingDate ? new Date(offer.closingDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A', 190, yPosition);
+                    
+                    yPosition += 6;
+                });
+            } else {
+                pdf.text('Nenhuma oportunidade em aberto', 15, yPosition);
+            }
+            
+            // Save the PDF
+            pdf.save('relatorio_funil_vendas.pdf');
+            showNotification('PDF do funil exportado com sucesso!');
+        });
+
+        async function clearCollection(collectionName) {
+            const snapshot = await firestore.collection(collectionName).get();
+            const batch = firestore.batch();
+            snapshot.docs.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
         }
 
-        // FIXED: clearAllData function
         async function clearAllData() {
             showNotification("Limpando banco de dados...");
-            
-            try {
-                // Clear each collection sequentially to avoid Firestore limits
-                const results = await Promise.allSettled([
-                    clearCollection('offers'),
-                    clearCollection('customers'),
-                    clearCollection('salesTeam')
-                ]);
-                
-                // Check if all operations were successful
-                const allSuccess = results.every(result => result.status === 'fulfilled' && result.value === true);
-                
-                if (allSuccess) {
-                    showNotification('Todos os dados foram apagados com sucesso!');
-                } else {
-                    showNotification('Alguns dados podem não ter sido completamente apagados. Verifique o console.', true);
-                }
-                
-                // Reload the database to reflect changes
-                loadDb();
-            } catch (error) {
-                console.error("Erro ao limpar o banco de dados: ", error);
-                showNotification('Erro ao limpar o banco de dados.', true);
-            }
+            await Promise.all([ clearCollection('offers'), clearCollection('customers'), clearCollection('salesTeam') ]);
         }
 
         document.getElementById('clearDbBtn').addEventListener('click', async () => {
             if (confirm('TEM CERTEZA ABSOLUTA? Esta ação apagará TODOS os dados no banco de dados da nuvem PERMANENTEMENTE.')) {
-                await clearAllData();
+                try {
+                    await clearAllData();
+                    showNotification('Todos os dados foram apagados.');
+                    loadDb();
+                } catch (error) {
+                    showNotification('Erro ao limpar o banco de dados.', true);
+                    console.error("Erro ao limpar: ", error);
+                }
             }
         });
         
@@ -722,6 +1305,12 @@
         document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', () => closeModal(btn.closest('.modal').id)));
         
         document.querySelectorAll('.filter-select').forEach(sel => sel.addEventListener('change', renderOffersTable));
+
+        // Add event listeners for funnel filters
+        document.getElementById('funnelSalesPersonFilter').addEventListener('change', renderSalesFunnel);
+        document.getElementById('funnelCustomerFilter').addEventListener('change', renderSalesFunnel);
+        document.getElementById('funnelHeatmapFilter').addEventListener('change', renderSalesFunnel);
+        document.getElementById('funnelClosingDateFilter').addEventListener('change', renderSalesFunnel);
 
         document.querySelectorAll('#offersTable th[data-sort]').forEach(headerCell => {
             headerCell.addEventListener('click', () => {
@@ -747,6 +1336,11 @@
                 targetLink.classList.add('active');
                 document.querySelector('.page-title').textContent = targetLink.textContent.trim();
                 if (window.innerWidth <= 992) document.getElementById('sidebar').classList.remove('active');
+                
+                // If sales funnel tab is selected, render it
+                if (tabId === 'sales-funnel') {
+                    renderSalesFunnel();
+                }
             });
         });
         
