@@ -105,6 +105,24 @@
         .funnel-item-progress { height: 6px; background: #e9ecef; border-radius: 3px; margin-top: 8px; overflow: hidden; }
         .funnel-item-progress-bar { height: 100%; border-radius: 3px; }
         
+        /* New styles for urgency highlighting */
+        .urgency-high { background-color: #ffebee; }
+        .urgency-medium { background-color: #fff8e1; }
+        .urgency-low { background-color: #e8f5e9; }
+        .urgency-icon { margin-left: 5px; font-size: 14px; }
+        .closing-soon { border-left: 4px solid #e74c3c !important; }
+        .closing-medium { border-left: 4px solid #f39c12 !important; }
+        .closing-far { border-left: 4px solid #2ecc71 !important; }
+        
+        /* Sales process guidance styles */
+        .process-guidance { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        .process-stage { margin-bottom: 15px; }
+        .process-stage-title { font-weight: 600; margin-bottom: 8px; color: var(--primary); }
+        .next-steps { margin-left: 20px; }
+        .next-step { display: flex; align-items: center; margin-bottom: 5px; }
+        .next-step input[type="checkbox"] { margin-right: 10px; }
+        .best-practices { margin-top: 10px; padding: 10px; background: white; border-radius: 5px; border-left: 3px solid var(--primary); }
+        
         @media (max-width: 992px) {
             .container { grid-template-columns: 1fr; }
             .sidebar { transform: translateX(-100%); z-index: 1000; }
@@ -152,6 +170,12 @@
                     <div class="filter-group"><label class="filter-label">Status</label><select class="filter-select" id="statusFilter"></select></div>
                     <div class="filter-group"><label class="filter-label">Heatmap</label><select class="filter-select" id="heatmapFilter"></select></div>
                     <div class="filter-group"><label class="filter-label">Mercado</label><select class="filter-select" id="marketFilter"></select></div>
+                    <div class="filter-group"><label class="filter-label">Urgência</label><select class="filter-select" id="urgencyFilter">
+                        <option value="">Todas</option>
+                        <option value="high">Alta Urgência</option>
+                        <option value="medium">Média Urgência</option>
+                        <option value="low">Baixa Urgência</option>
+                    </select></div>
                 </div>
                 <div class="data-table-container">
                     <table class="data-table" id="offersTable">
@@ -167,12 +191,72 @@
                                 <th data-sort="heatmap">Heatmap <i class="fas fa-sort sort-icon"></i></th>
                                 <th data-sort="status">Status <i class="fas fa-sort sort-icon"></i></th>
                                 <th data-sort="reminderDate">Lembrete <i class="fas fa-sort sort-icon"></i></th>
+                                <th>Urgência</th>
                                 <th>Comentários</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
                     </table>
+                </div>
+                
+                <div class="process-guidance">
+                    <h3>Orientação do Processo de Vendas</h3>
+                    <div class="process-stage">
+                        <div class="process-stage-title">Prospecção</div>
+                        <div class="next-steps">
+                            <label class="next-step"><input type="checkbox"> Pesquisar informações do cliente</label>
+                            <label class="next-step"><input type="checkbox"> Identificar tomador de decisão</label>
+                            <label class="next-step"><input type="checkbox"> Preparar abordagem inicial</label>
+                        </div>
+                        <div class="best-practices">
+                            <strong>Melhores Práticas:</strong> Foque em entender as necessidades do cliente antes de apresentar soluções.
+                        </div>
+                    </div>
+                    <div class="process-stage">
+                        <div class="process-stage-title">Qualificação</div>
+                        <div class="next-steps">
+                            <label class="next-step"><input type="checkbox"> Agendar reunião de qualificação</label>
+                            <label class="next-step"><input type="checkbox"> Identificar orçamento e timeframe</label>
+                            <label class="next-step"><input type="checkbox"> Validar necessidade real</label>
+                        </div>
+                        <div class="best-practices">
+                            <strong>Melhores Práticas:</strong> Use perguntas abertas para descobrir dores e objetivos.
+                        </div>
+                    </div>
+                    <div class="process-stage">
+                        <div class="process-stage-title">Proposta</div>
+                        <div class="next-steps">
+                            <label class="next-step"><input type="checkbox"> Personalizar proposta</label>
+                            <label class="next-step"><input type="checkbox"> Incluir casos de sucesso relevantes</label>
+                            <label class="next-step"><input type="checkbox"> Agendar apresentação</label>
+                        </div>
+                        <div class="best-practices">
+                            <strong>Melhores Práticas:</strong> Destaque o ROI e benefícios específicos para o cliente.
+                        </div>
+                    </div>
+                    <div class="process-stage">
+                        <div class="process-stage-title">Negociação</div>
+                        <div class="next-steps">
+                            <label class="next-step"><input type="checkbox"> Preparar contraproposta</label>
+                            <label class="next-step"><input type="checkbox"> Identificar objeções</label>
+                            <label class="next-step"><input type="checkbox"> Oferecer prova social</label>
+                        </div>
+                        <div class="best-practices">
+                            <strong>Melhores Práticas:</strong> Mantenha foco no valor, não apenas no preço.
+                        </div>
+                    </div>
+                    <div class="process-stage">
+                        <div class="process-stage-title">Fechado</div>
+                        <div class="next-steps">
+                            <label class="next-step"><input type="checkbox"> Enviar documentação final</label>
+                            <label class="next-step"><input type="checkbox"> Agendar onboarding</label>
+                            <label class="next-step"><input type="checkbox"> Solicitar referência</label>
+                        </div>
+                        <div class="best-practices">
+                            <strong>Melhores Práticas:</strong> Celebre a vitória e planeje a expansão da conta.
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -212,6 +296,15 @@
                             <label class="filter-label">Data de Fechamento</label>
                             <input type="date" class="filter-input" id="funnelClosingDateFilter">
                         </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Urgência</label>
+                            <select class="filter-select" id="funnelUrgencyFilter">
+                                <option value="">Todas</option>
+                                <option value="high">Alta Urgência</option>
+                                <option value="medium">Média Urgência</option>
+                                <option value="low">Baixa Urgência</option>
+                            </select>
+                        </div>
                     </div>
                     
                     <div class="chart-container">
@@ -220,8 +313,7 @@
                     </div>
                     
                     <div class="funnel-visualization" id="funnelStagesContainer">
-                        <!-- Funnel stages will be dynamically generated here -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
@@ -230,7 +322,7 @@
             <div class="tab-content" id="management">
                 <div class="tabs"><div class="tab active" data-subtab="sales-team">Equipe de Vendas</div><div class="tab" data-subtab="customers">Clientes</div></div>
                 <div class="tab-content active" id="sales-team"><button class="btn btn-primary" id="addSalesPersonBtn"><i class="fas fa-plus"></i> Adicionar Vendedor</button><div class="data-table-container"><table class="data-table" id="salesTeamTable"><thead><tr><th>Nome</th><th>Email</th><th>Ações</th></tr></thead><tbody></tbody></table></div></div>
-                <div class="tab-content" id="customers"><button class="btn btn-primary" id="addCustomerBtn"><i class="fas fa-plus"></i> Adicionar Cliente</button><div class="data-table-container"><table class="data-table" id="customersTable"><thead><tr><th>Nome</th><th>Setor</th><th>Ações</th></tr></thead><tbody></tbody></table></div></div>
+                <div class="tab-content" id="customers"><button class="btn btn-primary" id="addCustomerBtn"><i class="fas fa-plus"></i> Adicionar Cliente</button><div class="data-table-container"><table class="data-table" id="customersTable"><thead><tr><th>Nome</th><th>Setor</th><th>Contato</th><th>Telefone</th><th>Email</th><th>Ações</th></tr></thead><tbody></tbody></table></div></div>
             </div>
             <div class="tab-content" id="reports"><div class="card"><div class="card-header">Relatórios de Vendas<button class="btn btn-primary" id="exportReportsPdf"><i class="fas fa-file-pdf"></i> Exportar para PDF</button></div><div class="charts"><div class="chart-container"><h3 class="card-header">Vendas por Mercado</h3><canvas id="marketChart"></canvas></div><div class="chart-container"><h3 class="card-header">Vendas por Vendedor</h3><canvas id="salesPersonChart"></canvas></div></div><div class="kpi-grid" id="kpi-grid-reports"></div></div></div>
             
@@ -314,8 +406,63 @@
         </div>
     </div>
 
-    <div class="modal" id="salesPersonModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Adicionar/Editar Vendedor</h3><button class="modal-close">&times;</button></div><form id="salesPersonForm"><input type="hidden" id="editSalesPersonId"><div class="form-group"><label class="form-label">Nome</label><input type="text" class="form-input" id="salesPersonName" required></div><div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="salesPersonEmail" required></div><button type="submit" class="btn btn-primary">Salvar Vendedor</button></form></div></div>
-    <div class="modal" id="customerModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Adicionar/Editar Cliente</h3><button class="modal-close">&times;</button></div><form id="customerForm"><input type="hidden" id="editCustomerId"><div class="form-group"><label class="form-label">Nome</label><input type="text" class="form-input" id="customerName" required></div><div class="form-group"><label class="form-label">Setor</label><input type="text" class="form-input" id="customerIndustry" required></div><button type="submit" class="btn btn-primary">Salvar Cliente</button></form></div></div>
+    <div class="modal" id="salesPersonModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Adicionar/Editar Vendedor</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="salesPersonForm">
+                <input type="hidden" id="editSalesPersonId">
+                <div class="form-group">
+                    <label class="form-label">Nome</label>
+                    <input type="text" class="form-input" id="salesPersonName" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="salesPersonEmail" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar Vendedor</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="modal" id="customerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Adicionar/Editar Cliente</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="customerForm">
+                <input type="hidden" id="editCustomerId">
+                <div class="form-group">
+                    <label class="form-label">Nome da Empresa</label>
+                    <input type="text" class="form-input" id="customerName" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Setor</label>
+                    <input type="text" class="form-input" id="customerIndustry" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nome do Contato</label>
+                    <input type="text" class="form-input" id="customerContactName">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Telefone</label>
+                    <input type="tel" class="form-input" id="customerContactPhone">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="customerContactEmail">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Departamento</label>
+                    <input type="text" class="form-input" id="customerContactDepartment">
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar Cliente</button>
+            </form>
+        </div>
+    </div>
 
     <div class="notification" id="notification"></div>
 
@@ -339,7 +486,7 @@
         let db = { offers: [], salesTeam: [], customers: [] };
         let sortState = { column: 'offerNumber', direction: 'asc' };
         
-        const MARKETS = ['Conforto', 'Industrial', 'Precisão', 'Hospitalar', 'Data Center', 'Produtos Customizados'];
+        const MARKETS = ['Conforto', 'Industrial', 'Precisão', 'Telecom','Hospitalar', 'Data Center', 'Produtos Customizados'];
         const STATUSES = {
             'prospecção': 'Prospecção', 
             'qualificação': 'Qualificação', 
@@ -441,6 +588,65 @@
             populateSelect('funnelCustomerFilter', db.customers, { placeholder: 'Todos os Clientes' });
         }
 
+        // Function to calculate urgency score
+        function calculateUrgency(offer) {
+            const today = new Date();
+            const closingDate = new Date(offer.closingDate + 'T00:00:00');
+            const daysUntilClosing = Math.ceil((closingDate - today) / (1000 * 60 * 60 * 24));
+            
+            // Calculate urgency score (0-100)
+            let score = 0;
+            
+            // Heatmap contributes 40% to the score
+            score += (offer.heatmap / 10) * 40;
+            
+            // Days until closing contributes 30% (more urgent if fewer days)
+            if (daysUntilClosing <= 7) score += 30;
+            else if (daysUntilClosing <= 14) score += 20;
+            else if (daysUntilClosing <= 30) score += 10;
+            
+            // Deal value contributes 20% (higher value = more urgent)
+            const maxValue = Math.max(...db.offers.map(o => o.value), 100000);
+            score += (offer.value / maxValue) * 20;
+            
+            // Probability contributes 10%
+            score += (offer.probability / 100) * 10;
+            
+            return {
+                score: Math.min(100, Math.round(score)),
+                daysUntilClosing: daysUntilClosing
+            };
+        }
+
+        // Function to get urgency level and icon
+        function getUrgencyInfo(urgencyScore, daysUntilClosing) {
+            if (urgencyScore >= 70 || daysUntilClosing <= 3) {
+                return { 
+                    level: 'high', 
+                    label: 'Alta', 
+                    icon: 'fas fa-exclamation-circle',
+                    color: '#e74c3c',
+                    rowClass: 'urgency-high'
+                };
+            } else if (urgencyScore >= 40 || daysUntilClosing <= 7) {
+                return { 
+                    level: 'medium', 
+                    label: 'Média', 
+                    icon: 'fas fa-exclamation-triangle',
+                    color: '#f39c12',
+                    rowClass: 'urgency-medium'
+                };
+            } else {
+                return { 
+                    level: 'low', 
+                    label: 'Baixa', 
+                    icon: 'fas fa-info-circle',
+                    color: '#2ecc71',
+                    rowClass: 'urgency-low'
+                };
+            }
+        }
+
         function renderOffersTable() {
             const tableBody = document.querySelector('#offersTable tbody');
             tableBody.innerHTML = '';
@@ -450,6 +656,7 @@
                 status: document.getElementById('statusFilter').value,
                 heatmap: document.getElementById('heatmapFilter').value,
                 market: document.getElementById('marketFilter').value,
+                urgency: document.getElementById('urgencyFilter').value,
             };
 
             let filteredOffers = db.offers.filter(offer => {
@@ -457,10 +664,17 @@
                     (filters.heatmap === '1-3' && offer.heatmap <= 3) ||
                     (filters.heatmap === '4-7' && offer.heatmap >= 4 && offer.heatmap <= 7) ||
                     (filters.heatmap === '8-10' && offer.heatmap >= 8);
+                
+                // Calculate urgency for filtering
+                const urgencyInfo = calculateUrgency(offer);
+                const urgencyLevel = getUrgencyInfo(urgencyInfo.score, urgencyInfo.daysUntilClosing).level;
+                const urgencyMatch = !filters.urgency || urgencyLevel === filters.urgency;
+                
                 return (!filters.salesPerson || offer.salesPersonId == filters.salesPerson) &&
                        (!filters.status || offer.status === filters.status) &&
                        (!filters.market || offer.market === filters.market) &&
-                       heatmapMatch;
+                       heatmapMatch &&
+                       urgencyMatch;
             });
 
             filteredOffers.sort((a, b) => {
@@ -491,15 +705,30 @@
                 else if (offer.heatmap >= 4) heatmapColor = '#f39c12';
                 else heatmapColor = '#e74c3c';
 
+                // Calculate urgency
+                const urgencyInfo = calculateUrgency(offer);
+                const urgency = getUrgencyInfo(urgencyInfo.score, urgencyInfo.daysUntilClosing);
+                
+                // Determine closing date class
+                let closingDateClass = '';
+                if (urgencyInfo.daysUntilClosing <= 3) closingDateClass = 'closing-soon';
+                else if (urgencyInfo.daysUntilClosing <= 7) closingDateClass = 'closing-medium';
+                else if (urgencyInfo.daysUntilClosing > 7) closingDateClass = 'closing-far';
+
                 const row = document.createElement('tr');
+                row.classList.add(urgency.rowClass);
                 row.innerHTML = `
-                    <td>${offer.offerNumber}</td> <td>${salesPerson}</td> <td>${customer}</td> <td>${offer.market}</td>
+                    <td>${offer.offerNumber}</td> 
+                    <td>${salesPerson}</td> 
+                    <td>${customer}</td> 
+                    <td>${offer.market}</td>
                     <td>${formatCurrency(offer.value)}</td>
                     <td>${offer.offerDate ? new Date(offer.offerDate + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
-                    <td>${offer.closingDate ? new Date(offer.closingDate + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
+                    <td class="${closingDateClass}">${offer.closingDate ? new Date(offer.closingDate + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
                     <td><div class="heatmap-cell"><div class="heatmap-bar-container"><div class="heatmap-bar" style="width: ${offer.heatmap * 10}%; background-color: ${heatmapColor};"></div></div><span class="heatmap-value">${offer.heatmap}</span></div></td>
                     <td><span class="status-badge status-${offer.status.replace(' ', '-')}">${STATUSES[offer.status] || offer.status}</span></td>
                     <td>${offer.reminderDate ? new Date(offer.reminderDate + 'T00:00:00').toLocaleDateString('pt-BR') : ''}</td>
+                    <td><i class="${urgency.icon} urgency-icon" style="color: ${urgency.color};" title="Urgência: ${urgency.label} (${urgencyInfo.score}/100)"></i> ${urgency.label}</td>
                     <td class="comment-cell" title="${offer.comments || ''}">${offer.comments || ''}</td>
                     <td class="actions-cell">
                         <button class="btn btn-primary btn-sm" onclick="handleEditOffer('${offer.id}')" title="Editar"><i class="fas fa-edit"></i></button>
@@ -544,7 +773,12 @@
             tableBody.innerHTML = '';
             db.customers.forEach(customer => {
                 const row = document.createElement('tr');
-                row.innerHTML = `<td>${customer.name}</td><td>${customer.industry}</td>
+                row.innerHTML = `
+                    <td>${customer.name}</td>
+                    <td>${customer.industry}</td>
+                    <td>${customer.contactName || 'N/A'}</td>
+                    <td>${customer.contactPhone || 'N/A'}</td>
+                    <td>${customer.contactEmail || 'N/A'}</td>
                     <td class="actions-cell">
                         <button class="btn btn-primary btn-sm" onclick="handleEditCustomer('${customer.id}')"><i class="fas fa-edit"></i> Editar</button>
                         <button class="btn btn-danger btn-sm" onclick="handleDelete('customers', '${customer.id}')"><i class="fas fa-trash"></i> Apagar</button>
@@ -622,6 +856,7 @@
             const customerFilter = document.getElementById('funnelCustomerFilter').value;
             const heatmapFilter = document.getElementById('funnelHeatmapFilter').value;
             const closingDateFilter = document.getElementById('funnelClosingDateFilter').value;
+            const urgencyFilter = document.getElementById('funnelUrgencyFilter').value;
             
             // Filter offers based on criteria
             let filteredOffers = db.offers.filter(offer => {
@@ -632,10 +867,16 @@
                 
                 const closingDateMatch = !closingDateFilter || offer.closingDate === closingDateFilter;
                 
+                // Calculate urgency for filtering
+                const urgencyInfo = calculateUrgency(offer);
+                const urgencyLevel = getUrgencyInfo(urgencyInfo.score, urgencyInfo.daysUntilClosing).level;
+                const urgencyMatch = !urgencyFilter || urgencyLevel === urgencyFilter;
+                
                 return (!salesPersonFilter || offer.salesPersonId === salesPersonFilter) &&
                        (!customerFilter || offer.customerId === customerFilter) &&
                        heatmapMatch &&
-                       closingDateMatch;
+                       closingDateMatch &&
+                       urgencyMatch;
             });
             
             // Update funnel overview chart
@@ -677,10 +918,14 @@
             else if (offer.heatmap >= 4) heatmapColor = '#f39c12';
             else heatmapColor = '#e74c3c';
             
+            // Calculate urgency
+            const urgencyInfo = calculateUrgency(offer);
+            const urgency = getUrgencyInfo(urgencyInfo.score, urgencyInfo.daysUntilClosing);
+            
             return `
                 <div class="funnel-item" style="border-left-color: ${STAGE_COLORS[offer.status] || '#ccc'}">
                     <div class="funnel-item-header">
-                        <div class="funnel-item-title">${customer}</div>
+                        <div class="funnel-item-title">${customer} <i class="${urgency.icon} urgency-icon" style="color: ${urgency.color};" title="Urgência: ${urgency.label} (${urgencyInfo.score}/100)"></i></div>
                         <div>${formatCurrency(offer.value)}</div>
                     </div>
                     <div class="funnel-item-details">
@@ -690,6 +935,7 @@
                         <div>Visitas: ${offer.visits || 0}</div>
                         <div>Revisões: ${offer.revisions || 0}</div>
                         <div>Fechamento: ${offer.closingDate ? new Date(offer.closingDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A'}</div>
+                        <div>Urgência: ${urgency.label} (${urgencyInfo.score}/100)</div>
                     </div>
                     <div class="funnel-item-progress">
                         <div class="funnel-item-progress-bar" style="width: ${offer.probability || 0}%; background-color: ${heatmapColor};"></div>
@@ -801,6 +1047,10 @@
             document.getElementById('editCustomerId').value = customer.id;
             document.getElementById('customerName').value = customer.name;
             document.getElementById('customerIndustry').value = customer.industry;
+            document.getElementById('customerContactName').value = customer.contactName || '';
+            document.getElementById('customerContactPhone').value = customer.contactPhone || '';
+            document.getElementById('customerContactEmail').value = customer.contactEmail || '';
+            document.getElementById('customerContactDepartment').value = customer.contactDepartment || '';
             openModal('customerModal');
         };
 
@@ -854,7 +1104,14 @@
         document.getElementById('customerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('editCustomerId').value;
-            const customerData = { name: document.getElementById('customerName').value, industry: document.getElementById('customerIndustry').value };
+            const customerData = { 
+                name: document.getElementById('customerName').value, 
+                industry: document.getElementById('customerIndustry').value,
+                contactName: document.getElementById('customerContactName').value,
+                contactPhone: document.getElementById('customerContactPhone').value,
+                contactEmail: document.getElementById('customerContactEmail').value,
+                contactDepartment: document.getElementById('customerContactDepartment').value
+            };
             try {
                 if (id) {
                     await firestore.collection('customers').doc(id).update(customerData);
@@ -883,6 +1140,63 @@
             } catch(error) { showNotification('Erro ao apagar item.', true); console.error(error); }
         };
 
+        // Function to parse various date formats
+        function parseDate(dateString) {
+            if (!dateString) return '';
+            
+            // Try to parse as ISO date (YYYY-MM-DD)
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+                return dateString;
+            }
+            
+            // Try to parse as Brazilian date (DD/MM/YYYY or DD/MM/YY)
+            if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(dateString)) {
+                const parts = dateString.split('/');
+                const day = parts[0].padStart(2, '0');
+                const month = parts[1].padStart(2, '0');
+                let year = parts[2];
+                
+                // Convert 2-digit year to 4-digit
+                if (year.length === 2) {
+                    year = '20' + year;
+                }
+                
+                return `${year}-${month}-${day}`;
+            }
+            
+            // Try to parse as US date (MM/DD/YYYY or MM/DD/YY) - assuming it might come in this format
+            const usDateMatch = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+            if (usDateMatch) {
+                const month = usDateMatch[1].padStart(2, '0');
+                const day = usDateMatch[2].padStart(2, '0');
+                let year = usDateMatch[3];
+                if (year.length === 2) {
+                    year = '20' + year;
+                }
+                return `${year}-${month}-${day}`;
+            }
+            
+            // Try to parse Excel serial date
+            if (!isNaN(dateString) && Number(dateString) > 25569) {
+                // Excel date (number of days since Jan 1, 1900)
+                const excelDate = Number(dateString);
+                const date = new Date((excelDate - 25569) * 86400 * 1000);
+                return date.toISOString().split('T')[0];
+            }
+            
+            // If all else fails, try to parse with Date object
+            try {
+                const date = new Date(dateString);
+                if (!isNaN(date.getTime())) {
+                    return date.toISOString().split('T')[0];
+                }
+            } catch (e) {
+                console.warn("Could not parse date:", dateString);
+            }
+            
+            return '';
+        }
+
         document.getElementById('exportXlsxBtn').addEventListener('click', () => {
             const offersSheet = db.offers.map(o => ({
                 'Proposta #': o.offerNumber, 
@@ -900,10 +1214,22 @@
                 'Lembrete': o.reminderDate, 
                 'Comentários': o.comments
             }));
+            
+            const salesTeamSheet = db.salesTeam.map(({id, ...rest}) => rest);
+            
+            const customersSheet = db.customers.map(customer => ({
+                'Nome': customer.name,
+                'Setor': customer.industry,
+                'Nome do Contato': customer.contactName || '',
+                'Telefone': customer.contactPhone || '',
+                'Email': customer.contactEmail || '',
+                'Departamento': customer.contactDepartment || ''
+            }));
+            
             const wb = XLSX.utils.book_new();
             const wsOffers = XLSX.utils.json_to_sheet(offersSheet);
-            const wsSalesTeam = XLSX.utils.json_to_sheet(db.salesTeam.map(({id, ...rest}) => rest)); // Remove ID
-            const wsCustomers = XLSX.utils.json_to_sheet(db.customers.map(({id, ...rest}) => rest)); // Remove ID
+            const wsSalesTeam = XLSX.utils.json_to_sheet(salesTeamSheet);
+            const wsCustomers = XLSX.utils.json_to_sheet(customersSheet);
             XLSX.utils.book_append_sheet(wb, wsOffers, "Ofertas");
             XLSX.utils.book_append_sheet(wb, wsSalesTeam, "Vendedores");
             XLSX.utils.book_append_sheet(wb, wsCustomers, "Clientes");
@@ -920,6 +1246,7 @@
             showNotification('Backup em JSON exportado!');
         });
         
+        // --- **** IMPORT FUNCTION - FIXED **** ---
         document.getElementById('importXlsxBtn').addEventListener('click', () => {
             const input = document.createElement('input');
             input.type = 'file';
@@ -928,97 +1255,102 @@
                 const file = e.target.files[0];
                 const reader = new FileReader();
                 reader.onload = async (event) => {
-                    if (!confirm("Atenção: A importação irá APAGAR TODOS os dados existentes. Deseja continuar?")) return;
+                    if (!confirm("Atenção: A importação irá APAGAR TODOS os dados existentes. Recomenda-se exportar um backup primeiro. Deseja continuar?")) return;
                     
                     try {
                         showNotification("Iniciando importação...");
                         
-                        // Clear existing data first
+                        // 1. Clear existing data from Firestore
                         await clearAllData();
                         
                         const data = new Uint8Array(event.target.result);
                         const workbook = XLSX.read(data, {type: 'array'});
                         
-                        // Check if required sheets exist
-                        if (!workbook.Sheets['Vendedores'] || !workbook.Sheets['Clientes'] || !workbook.Sheets['Ofertas']) {
-                            throw new Error("O arquivo Excel deve conter as planilhas: Vendedores, Clientes e Ofertas");
-                        }
-                        
-                        // Import sales team
-                        const salesTeamData = XLSX.utils.sheet_to_json(workbook.Sheets['Vendedores']);
-                        const salesTeamMap = {};
+                        // 2. Helper function to normalize strings for matching
+                        const normalize = (str) => (str || '').toString().toLowerCase().trim();
+
+                        // 3. Import Sales Team and create a map for quick lookup
+                        const salesTeamData = XLSX.utils.sheet_to_json(workbook.Sheets['Vendedores'] || []);
+                        const salesTeamMap = new Map();
                         for (const person of salesTeamData) {
-                            if (!person.name || !person.email) {
-                                console.warn("Vendedor inválido ignorado:", person);
-                                continue;
+                            if (person.Nome && person.Email) {
+                                const docRef = await firestore.collection('salesTeam').add({
+                                    name: person.Nome,
+                                    email: person.Email
+                                });
+                                salesTeamMap.set(normalize(person.Nome), docRef.id);
                             }
-                            const docRef = await firestore.collection('salesTeam').add({
-                                name: person.name,
-                                email: person.email
-                            });
-                            salesTeamMap[person.name] = docRef.id;
                         }
-                        
-                        // Import customers
-                        const customersData = XLSX.utils.sheet_to_json(workbook.Sheets['Clientes']);
-                        const customersMap = {};
+
+                        // 4. Import Customers and create a map for quick lookup
+                        const customersData = XLSX.utils.sheet_to_json(workbook.Sheets['Clientes'] || []);
+                        const customersMap = new Map();
                         for (const customer of customersData) {
-                            if (!customer.name || !customer.industry) {
-                                console.warn("Cliente inválido ignorado:", customer);
-                                continue;
+                            if (customer.Nome && customer.Setor) {
+                                const docRef = await firestore.collection('customers').add({
+                                    name: customer.Nome,
+                                    industry: customer.Setor,
+                                    contactName: customer['Nome do Contato'] || '',
+                                    contactPhone: customer.Telefone || '',
+                                    contactEmail: customer.Email || '',
+                                    contactDepartment: customer.Departamento || ''
+                                });
+                                customersMap.set(normalize(customer.Nome), docRef.id);
                             }
-                            const docRef = await firestore.collection('customers').add({
-                                name: customer.name,
-                                industry: customer.industry
-                            });
-                            customersMap[customer.name] = docRef.id;
                         }
-                        
-                        // Import offers
-                        const offersData = XLSX.utils.sheet_to_json(workbook.Sheets['Ofertas']);
-                        const batch = firestore.batch();
-                        
+
+                        // 5. Import Offers using the maps for relationships
+                        const offersData = XLSX.utils.sheet_to_json(workbook.Sheets['Ofertas'] || []);
+                        let batch = firestore.batch();
+                        let batchCount = 0;
+                        let successfulImports = 0;
+
                         for (const offer of offersData) {
-                            // Validate required fields
-                            if (!offer['Proposta #'] || !offer['Vendedor'] || !offer['Cliente'] || 
-                                !offer['Mercado'] || !offer['Valor'] || !offer['Status']) {
-                                console.warn("Proposta inválida ignorada:", offer);
+                            const salesPersonId = salesTeamMap.get(normalize(offer['Vendedor']));
+                            const customerId = customersMap.get(normalize(offer['Cliente']));
+
+                            if (!offer['Proposta #'] || !salesPersonId || !customerId) {
+                                console.warn("Proposta ignorada por falta de dados ou Vendedor/Cliente não encontrado:", offer);
                                 continue;
                             }
-                            
-                            // Get references to sales person and customer
-                            const salesPersonId = salesTeamMap[offer['Vendedor']];
-                            const customerId = customersMap[offer['Cliente']];
-                            
-                            if (!salesPersonId || !customerId) {
-                                console.warn("Vendedor ou cliente não encontrado para proposta:", offer);
-                                continue;
-                            }
-                            
-                            const newOfferRef = firestore.collection('offers').doc();
+
                             const offerPayload = {
-                                offerNumber: offer['Proposta #'],
+                                offerNumber: offer['Proposta #'].toString(),
                                 salesPersonId: salesPersonId,
                                 customerId: customerId,
-                                market: offer['Mercado'],
-                                value: parseFloat(offer['Valor']),
-                                offerDate: offer['Data da Proposta'] || '',
-                                closingDate: offer['Data de Fechamento'] || '',
+                                market: offer['Mercado'] || 'Não especificado',
+                                value: parseFloat(offer['Valor'] || 0),
+                                offerDate: parseDate(offer['Data da Proposta']) || '',
+                                closingDate: parseDate(offer['Data de Fechamento']) || '',
                                 heatmap: parseInt(offer['Heatmap']) || 5,
-                                status: offer['Status'].toLowerCase(),
+                                status: (offer['Status'] || 'prospecção').toLowerCase(),
                                 probability: parseInt(offer['Probabilidade']) || 0,
                                 visits: parseInt(offer['Visitas']) || 0,
                                 revisions: parseInt(offer['Revisões']) || 0,
-                                reminderDate: offer['Lembrete'] || '',
+                                reminderDate: parseDate(offer['Lembrete']) || '',
                                 comments: offer['Comentários'] || ''
                             };
                             
+                            const newOfferRef = firestore.collection('offers').doc();
                             batch.set(newOfferRef, offerPayload);
+                            batchCount++;
+                            successfulImports++;
+
+                            // Firebase limits batches to 500 operations. We commit and create a new one.
+                            if (batchCount >= 490) {
+                                await batch.commit();
+                                batch = firestore.batch(); // Create a new batch
+                                batchCount = 0;
+                            }
+                        }
+
+                        // Commit any remaining operations in the final batch
+                        if (batchCount > 0) {
+                            await batch.commit();
                         }
                         
-                        await batch.commit();
-                        showNotification('Importação concluída com sucesso!');
-                        loadDb();
+                        showNotification(`Importação concluída! ${successfulImports}/${offersData.length} propostas importadas.`);
+                        loadDb(); // Reload all data from Firestore to update the UI
                     } catch (err) {
                         console.error("Erro de importação: ", err);
                         showNotification('Erro na importação: ' + err.message, true);
@@ -1029,6 +1361,7 @@
             input.click();
         });
 
+
         // Export Funnel to XLSX
         document.getElementById('exportFunnelXlsx').addEventListener('click', () => {
             // Get filter values
@@ -1036,6 +1369,7 @@
             const customerFilter = document.getElementById('funnelCustomerFilter').value;
             const heatmapFilter = document.getElementById('funnelHeatmapFilter').value;
             const closingDateFilter = document.getElementById('funnelClosingDateFilter').value;
+            const urgencyFilter = document.getElementById('funnelUrgencyFilter').value;
             
             // Filter offers based on criteria
             let filteredOffers = db.offers.filter(offer => {
@@ -1046,29 +1380,43 @@
                 
                 const closingDateMatch = !closingDateFilter || offer.closingDate === closingDateFilter;
                 
+                // Calculate urgency for filtering
+                const urgencyInfo = calculateUrgency(offer);
+                const urgencyLevel = getUrgencyInfo(urgencyInfo.score, urgencyInfo.daysUntilClosing).level;
+                const urgencyMatch = !urgencyFilter || urgencyLevel === urgencyFilter;
+                
                 return (!salesPersonFilter || offer.salesPersonId === salesPersonFilter) &&
                        (!customerFilter || offer.customerId === customerFilter) &&
                        heatmapMatch &&
-                       closingDateMatch;
+                       closingDateMatch &&
+                       urgencyMatch;
             });
             
-            const funnelSheet = filteredOffers.map(o => ({
-                'Proposta #': o.offerNumber, 
-                'Vendedor': getById(db.salesTeam, o.salesPersonId)?.name || 'N/A', 
-                'Cliente': getById(db.customers, o.customerId)?.name || 'N/A', 
-                'Mercado': o.market, 
-                'Valor': o.value, 
-                'Valor Esperado': o.value * (o.probability / 100),
-                'Data da Proposta': o.offerDate, 
-                'Data de Fechamento': o.closingDate, 
-                'Heatmap': o.heatmap, 
-                'Status': STATUSES[o.status] || o.status, 
-                'Probabilidade': o.probability || 0,
-                'Visitas': o.visits || 0,
-                'Revisões': o.revisions || 0,
-                'Lembrete': o.reminderDate, 
-                'Comentários': o.comments
-            }));
+            const funnelSheet = filteredOffers.map(o => {
+                const urgencyInfo = calculateUrgency(o);
+                const urgency = getUrgencyInfo(urgencyInfo.score, urgencyInfo.daysUntilClosing);
+                
+                return {
+                    'Proposta #': o.offerNumber, 
+                    'Vendedor': getById(db.salesTeam, o.salesPersonId)?.name || 'N/A', 
+                    'Cliente': getById(db.customers, o.customerId)?.name || 'N/A', 
+                    'Mercado': o.market, 
+                    'Valor': o.value, 
+                    'Valor Esperado': o.value * (o.probability / 100),
+                    'Data da Proposta': o.offerDate, 
+                    'Data de Fechamento': o.closingDate, 
+                    'Heatmap': o.heatmap, 
+                    'Status': STATUSES[o.status] || o.status, 
+                    'Probabilidade': o.probability || 0,
+                    'Visitas': o.visits || 0,
+                    'Revisões': o.revisions || 0,
+                    'Urgência': urgency.label,
+                    'Pontuação de Urgência': urgencyInfo.score,
+                    'Dias até Fechamento': urgencyInfo.daysUntilClosing,
+                    'Lembrete': o.reminderDate, 
+                    'Comentários': o.comments
+                };
+            });
             
             const wb = XLSX.utils.book_new();
             const wsFunnel = XLSX.utils.json_to_sheet(funnelSheet);
@@ -1084,23 +1432,25 @@
             
             // Add title
             pdf.setFontSize(20);
-            pdf.text('Relatório do Funil de Vendas', 105, 15, { align: 'center' });
+            pdf.text('Relatório do Funil de Vendas', 148, 15, { align: 'center' });
             
             // Add date
             pdf.setFontSize(12);
-            pdf.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 105, 22, { align: 'center' });
+            pdf.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 148, 22, { align: 'center' });
             
             // Add filters info
             const salesPersonFilter = document.getElementById('funnelSalesPersonFilter');
             const customerFilter = document.getElementById('funnelCustomerFilter');
             const heatmapFilter = document.getElementById('funnelHeatmapFilter');
             const closingDateFilter = document.getElementById('funnelClosingDateFilter');
+            const urgencyFilter = document.getElementById('funnelUrgencyFilter');
             
             let filtersText = 'Filtros aplicados: ';
             if (salesPersonFilter.value) filtersText += `Vendedor: ${salesPersonFilter.options[salesPersonFilter.selectedIndex].text}, `;
             if (customerFilter.value) filtersText += `Cliente: ${customerFilter.options[customerFilter.selectedIndex].text}, `;
             if (heatmapFilter.value) filtersText += `Heatmap: ${heatmapFilter.options[heatmapFilter.selectedIndex].text}, `;
-            if (closingDateFilter.value) filtersText += `Data de Fechamento: ${closingDateFilter.value}, `;
+            if (closingDateFilter.value) filtersText += `Data de Fechamento: ${new Date(closingDateFilter.value + 'T00:00:00').toLocaleDateString('pt-BR')}, `;
+            if (urgencyFilter.value) filtersText += `Urgência: ${urgencyFilter.options[urgencyFilter.selectedIndex].text}, `;
             
             if (filtersText === 'Filtros aplicados: ') {
                 filtersText += 'Nenhum filtro aplicado';
@@ -1109,13 +1459,13 @@
             }
             
             pdf.setFontSize(10);
-            pdf.text(filtersText, 105, 29, { align: 'center', maxWidth: 250 });
+            pdf.text(filtersText, 148, 29, { align: 'center', maxWidth: 280 });
             
             // Add chart image
             const canvas = document.getElementById('funnelOverviewChart');
             const chartImage = await html2canvas(canvas);
             const imgData = chartImage.toDataURL('image/png');
-            pdf.addImage(imgData, 'PNG', 15, 35, 260, 80);
+            pdf.addImage(imgData, 'PNG', 15, 35, 267, 80); // Adjusted width for landscape A4
             
             // Add stage statistics
             let yPosition = 125;
@@ -1123,26 +1473,8 @@
             pdf.text('Resumo por Estágio', 15, yPosition);
             yPosition += 8;
             
-            // Get filter values
-            const salesPersonFilterVal = salesPersonFilter.value;
-            const customerFilterVal = customerFilter.value;
-            const heatmapFilterVal = heatmapFilter.value;
-            const closingDateFilterVal = closingDateFilter.value;
-            
-            // Filter offers based on criteria
-            let filteredOffers = db.offers.filter(offer => {
-                const heatmapMatch = !heatmapFilterVal || 
-                    (heatmapFilterVal === '1-3' && offer.heatmap <= 3) ||
-                    (heatmapFilterVal === '4-7' && offer.heatmap >= 4 && offer.heatmap <= 7) ||
-                    (heatmapFilterVal === '8-10' && offer.heatmap >= 8);
-                
-                const closingDateMatch = !closingDateFilterVal || offer.closingDate === closingDateFilterVal;
-                
-                return (!salesPersonFilterVal || offer.salesPersonId === salesPersonFilterVal) &&
-                       (!customerFilterVal || offer.customerId === customerFilterVal) &&
-                       heatmapMatch &&
-                       closingDateMatch;
-            });
+            // Use existing filtered data logic
+            const filteredOffers = getFilteredFunnelOffers();
             
             // Calculate stage statistics
             const stageStats = {};
@@ -1155,114 +1487,95 @@
                 };
             });
             
-            // Add stage statistics table
-            pdf.setFontSize(10);
-            pdf.text('Estágio', 15, yPosition);
-            pdf.text('Oportunidades', 60, yPosition);
-            pdf.text('Valor Total', 100, yPosition);
-            pdf.text('Valor Esperado', 140, yPosition);
-            pdf.text('Taxa de Conversão', 180, yPosition);
-            yPosition += 5;
-            
-            // Draw line
-            pdf.line(15, yPosition, 200, yPosition);
-            yPosition += 5;
-            
-            let totalValue = 0;
-            let totalExpected = 0;
-            
-            Object.entries(STATUSES).forEach(([statusKey, statusLabel]) => {
+            const tableData = Object.entries(STATUSES).map(([statusKey, statusLabel]) => {
                 const stats = stageStats[statusKey];
-                totalValue += stats.totalValue;
-                totalExpected += stats.expectedValue;
-                
-                pdf.text(statusLabel, 15, yPosition);
-                pdf.text(stats.count.toString(), 60, yPosition);
-                pdf.text(formatCurrency(stats.totalValue), 100, yPosition);
-                pdf.text(formatCurrency(stats.expectedValue), 140, yPosition);
-                
-                // Calculate conversion rate (for stages before "fechado")
-                if (statusKey !== 'fechado' && statusKey !== 'perdido') {
-                    const nextStage = Object.keys(STATUSES)[Object.keys(STATUSES).indexOf(statusKey) + 1];
-                    if (nextStage && stageStats[nextStage]) {
-                        const conversionRate = stats.count > 0 ? (stageStats[nextStage].count / stats.count * 100).toFixed(1) : 0;
-                        pdf.text(`${conversionRate}%`, 180, yPosition);
-                    } else {
-                        pdf.text('N/A', 180, yPosition);
-                    }
-                } else {
-                    pdf.text('N/A', 180, yPosition);
-                }
-                
-                yPosition += 6;
+                return [statusLabel, stats.count.toString(), formatCurrency(stats.totalValue), formatCurrency(stats.expectedValue)];
             });
-            
-            // Add totals
-            yPosition += 3;
-            pdf.setFontSize(11);
-            pdf.setFont(undefined, 'bold');
-            pdf.text('TOTAL', 15, yPosition);
-            pdf.text(filteredOffers.length.toString(), 60, yPosition);
-            pdf.text(formatCurrency(totalValue), 100, yPosition);
-            pdf.text(formatCurrency(totalExpected), 140, yPosition);
-            pdf.setFont(undefined, 'normal');
+
+            pdf.autoTable({
+                startY: yPosition,
+                head: [['Estágio', 'Oportunidades', 'Valor Total', 'Valor Esperado']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [44, 62, 80] }
+            });
+            yPosition = pdf.previousAutoTable.finalY + 10;
             
             // Add key opportunities
-            yPosition += 15;
-            if (yPosition > 270) {
+            if (yPosition > 180) { // Check if new page is needed
                 pdf.addPage();
                 yPosition = 20;
             }
             
             pdf.setFontSize(14);
-            pdf.text('Principais Oportunidades', 15, yPosition);
+            pdf.text('Principais Oportunidades (Top 5)', 15, yPosition);
             yPosition += 8;
             
-            // Get top 5 opportunities by expected value
             const topOpportunities = filteredOffers
                 .filter(o => o.status !== 'fechado' && o.status !== 'perdido')
                 .sort((a, b) => (b.value * (b.probability / 100)) - (a.value * (a.probability / 100)))
                 .slice(0, 5);
             
             if (topOpportunities.length > 0) {
-                pdf.setFontSize(10);
-                pdf.text('Cliente', 15, yPosition);
-                pdf.text('Vendedor', 60, yPosition);
-                pdf.text('Valor', 100, yPosition);
-                pdf.text('Prob.', 130, yPosition);
-                pdf.text('Valor Esperado', 150, yPosition);
-                pdf.text('Fechamento', 190, yPosition);
-                yPosition += 5;
-                
-                // Draw line
-                pdf.line(15, yPosition, 200, yPosition);
-                yPosition += 5;
-                
-                topOpportunities.forEach(offer => {
+                 const topOppTable = topOpportunities.map(offer => {
                     const salesPerson = getById(db.salesTeam, offer.salesPersonId)?.name || 'N/A';
                     const customer = getById(db.customers, offer.customerId)?.name || 'N/A';
                     const expectedValue = offer.value * (offer.probability / 100);
-                    
-                    pdf.text(customer, 15, yPosition);
-                    pdf.text(salesPerson, 60, yPosition);
-                    pdf.text(formatCurrency(offer.value), 100, yPosition);
-                    pdf.text(`${offer.probability}%`, 130, yPosition);
-                    pdf.text(formatCurrency(expectedValue), 150, yPosition);
-                    pdf.text(offer.closingDate ? new Date(offer.closingDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A', 190, yPosition);
-                    
-                    yPosition += 6;
+                    const urgencyInfo = calculateUrgency(offer);
+                    const urgency = getUrgencyInfo(urgencyInfo.score, urgencyInfo.daysUntilClosing);
+                    return [
+                        customer,
+                        salesPerson,
+                        formatCurrency(offer.value),
+                        `${offer.probability}%`,
+                        formatCurrency(expectedValue),
+                        offer.closingDate ? new Date(offer.closingDate + 'T00:00:00').toLocaleDateString('pt-BR') : 'N/A',
+                        urgency.label
+                    ];
+                });
+
+                pdf.autoTable({
+                    startY: yPosition,
+                    head: [['Cliente', 'Vendedor', 'Valor', 'Prob.', 'Valor Esperado', 'Fechamento', 'Urgência']],
+                    body: topOppTable,
+                    theme: 'striped',
+                    headStyles: { fillColor: [44, 62, 80] }
                 });
             } else {
-                pdf.text('Nenhuma oportunidade em aberto', 15, yPosition);
+                pdf.text('Nenhuma oportunidade em aberto encontrada.', 15, yPosition);
             }
             
-            // Save the PDF
             pdf.save('relatorio_funil_vendas.pdf');
             showNotification('PDF do funil exportado com sucesso!');
         });
+        
+        function getFilteredFunnelOffers() {
+            const salesPersonFilter = document.getElementById('funnelSalesPersonFilter').value;
+            const customerFilter = document.getElementById('funnelCustomerFilter').value;
+            const heatmapFilter = document.getElementById('funnelHeatmapFilter').value;
+            const closingDateFilter = document.getElementById('funnelClosingDateFilter').value;
+            const urgencyFilter = document.getElementById('funnelUrgencyFilter').value;
+
+            return db.offers.filter(offer => {
+                const heatmapMatch = !heatmapFilter || 
+                    (heatmapFilter === '1-3' && offer.heatmap <= 3) ||
+                    (heatmapFilter === '4-7' && offer.heatmap >= 4 && offer.heatmap <= 7) ||
+                    (heatmapFilter === '8-10' && offer.heatmap >= 8);
+                const closingDateMatch = !closingDateFilter || offer.closingDate === closingDateFilter;
+                const urgencyInfo = calculateUrgency(offer);
+                const urgencyLevel = getUrgencyInfo(urgencyInfo.score, urgencyInfo.daysUntilClosing).level;
+                const urgencyMatch = !urgencyFilter || urgencyLevel === urgencyFilter;
+                
+                return (!salesPersonFilter || offer.salesPersonId === salesPersonFilter) &&
+                       (!customerFilter || offer.customerId === customerFilter) &&
+                       heatmapMatch && closingDateMatch && urgencyMatch;
+            });
+        }
+
 
         async function clearCollection(collectionName) {
             const snapshot = await firestore.collection(collectionName).get();
+            if (snapshot.size === 0) return;
             const batch = firestore.batch();
             snapshot.docs.forEach(doc => batch.delete(doc.ref));
             await batch.commit();
@@ -1312,6 +1625,7 @@
         document.getElementById('funnelCustomerFilter').addEventListener('change', renderSalesFunnel);
         document.getElementById('funnelHeatmapFilter').addEventListener('change', renderSalesFunnel);
         document.getElementById('funnelClosingDateFilter').addEventListener('change', renderSalesFunnel);
+        document.getElementById('funnelUrgencyFilter').addEventListener('change', renderSalesFunnel);
 
         document.querySelectorAll('#offersTable th[data-sort]').forEach(headerCell => {
             headerCell.addEventListener('click', () => {
@@ -1365,6 +1679,14 @@
             const element = document.getElementById(elementId);
             if (!element) return;
             showNotification('Gerando PDF...');
+            // Need to add jsPDF-AutoTable script for this to work
+            if (typeof jsPDF.API.autoTable !== 'function') {
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js';
+                document.head.appendChild(script);
+                await new Promise(resolve => script.onload = resolve);
+            }
+            
             const canvas = await html2canvas(element, { scale: 2 });
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
