@@ -450,7 +450,36 @@
 
 
             <div class="tab-content" id="sales-funnel"><div class="chart-container"><h3 class="card-header">Funil de Vendas por Etapa</h3><canvas id="funnelDetailChart"></canvas></div></div>
-            <div class="tab-content" id="kpis"><div class="card"><div class="card-header">Análise de KPIs<button class="btn btn-primary" id="exportKpisPdf"><i class="fas fa-file-pdf"></i> Exportar para PDF</button></div><div id="kpi-details-grid" class="kpi-grid"></div></div></div>
+            
+           
+                       <div class="tab-content" id="kpis">
+                <div class="card">
+                    <div class="card-header">
+                        Análise de KPIs
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" id="exportKpisPdf"><i class="fas fa-file-pdf"></i> Exportar para PDF</button>
+                        </div>
+                    </div>
+                    <div class="filters" style="margin-bottom: 20px;">
+                        <div class="filter-group">
+                            <label class="filter-label">Data de Início</label>
+                            <input type="date" class="filter-input" id="kpiStartDateFilter">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Data de Fim</label>
+                            <input type="date" class="filter-input" id="kpiEndDateFilter">
+                        </div>
+                        <div class="filter-group" style="align-self: flex-end;">
+                            <button class="btn btn-primary" id="applyKpiFiltersBtn"><i class="fas fa-filter"></i> Aplicar Filtros</button>
+                            <button class="btn btn-info" id="resetKpiFiltersBtn"><i class="fas fa-undo"></i> Limpar Filtros</button>
+                        </div>
+                    </div>
+                    <div id="kpi-details-grid" class="kpi-grid"></div>
+                </div>
+            </div>
+           
+           
+           
             <div class="tab-content" id="management">
                 <div class="tabs"><div class="tab active" data-subtab="sales-team">Equipe de Vendas</div><div class="tab" data-subtab="customers">Clientes</div></div>
                 <div class="tab-content active" id="sales-team"><button class="btn btn-primary" id="addSalesPersonBtn"><i class="fas fa-plus"></i> Adicionar Vendedor</button><div class="data-table-container"><table class="data-table" id="salesTeamTable"><thead><tr><th>Nome</th><th>Email</th><th>Ações</th></tr></thead><tbody></tbody></table></div></div>
@@ -1039,6 +1068,33 @@
                 const closedOffers = personOffers.filter(o => o.status === 'fechado').length;
                 const conversionRate = personOffers.length > 0 ? ((closedOffers / personOffers.length) * 100).toFixed(1) : 0;
                 const kpiCard = document.createElement('div');
+                        document.getElementById('applyKpiFiltersBtn').addEventListener('click', renderKpiPage);
+        document.getElementById('resetKpiFiltersBtn').addEventListener('click', () => {
+            document.getElementById('kpiStartDateFilter').value = '';
+            document.getElementById('kpiEndDateFilter').value = '';
+            renderKpiPage();
+        });
+
+
+
+
+        document.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const tabId = e.currentTarget.dataset.tab;
+                document.querySelectorAll('.tab-content.active, .menu-link.active').forEach(el => el.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+                e.currentTarget.classList.add('active');
+                document.querySelector('.page-title').textContent = e.currentTarget.textContent.trim();
+                if (window.innerWidth <= 992) document.getElementById('sidebar').classList.remove('active');
+                if (tabId === 'sales-funnel') renderSalesFunnel();
+                if (tabId === 'kpis') renderKpiPage(); // Added this line
+            });
+        });
+
+
+
+
                 kpiCard.className = 'kpi-card';
                 kpiCard.innerHTML = `<div class="kpi-label">${person.name}</div><div class="kpi-value">${conversionRate}%</div><div class="kpi-label">Taxa de Conversão (${closedOffers}/${personOffers.length})</div>`;
                 kpiGrid.appendChild(kpiCard);
@@ -1047,9 +1103,29 @@
 
         function renderKpiPage() {
             const kpiGrid = document.getElementById('kpi-details-grid');
-            if (!kpiGrid) return; kpiGrid.innerHTML = '';
+            if (!kpiGrid) return; 
+            kpiGrid.innerHTML = '';
+
+            const startDate = document.getElementById('kpiStartDateFilter').value;
+            const endDate = document.getElementById('kpiEndDateFilter').value;
+            
+
+            let filteredOffers = db.offers;
+
+            if (startDate) {
+                filteredOffers = filteredOffers.filter(o => o.offerDate >= startDate);
+            }
+            if (endDate) {
+                filteredOffers = filteredOffers.filter(o => o.offerDate <= endDate);
+            }
+
+            if (filteredOffers.length === 0 && (startDate || endDate)) {
+                kpiGrid.innerHTML = '<div class="card" style="text-align: center; padding: 20px;"><p style="color:#777;">Nenhum dado encontrado para o período selecionado.</p></div>';
+                return;
+            }
+
             db.salesTeam.forEach(person => {
-                const personOffers = db.offers.filter(o => o.salesPersonId === person.id);
+                const personOffers = filteredOffers.filter(o => o.salesPersonId === person.id);
                 const totalValue = personOffers.reduce((sum, o) => sum + o.value, 0);
                 const avgDealSize = personOffers.length > 0 ? totalValue / personOffers.length : 0;
                 const closedOffers = personOffers.filter(o => o.status === 'fechado');
@@ -1201,6 +1277,8 @@
             document.getElementById('visitsInput').value = offer.visits || 0;
             document.getElementById('revisionsInput').value = offer.revisions || 0;
             document.getElementById('commentsInput').value = offer.comments || '';
+
+            
 
             if (offer.items && Array.isArray(offer.items)) {
                 document.getElementById('pnitemsselect').value = offer.items.map(item => item.pn).join('\n');
@@ -1736,6 +1814,7 @@
         document.getElementById('exportReportsPdf').addEventListener('click', () => exportElementToPdf('reports', 'relatorios_vendas.pdf'));
         
         renderSalesFunnelVisualization();
+        renderKpiPage();
         loadDb();
     });
 </script>
