@@ -7,10 +7,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <style>
         :root {
             --primary: #2c3e50; --secondary: #34495e; --accent: #e74c3c; --light: #ecf0f1;
@@ -19,7 +21,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f5f7fa; color: var(--text); line-height: 1.6; }
         .container { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
-        .sidebar { background: var(--primary); color: var(--text-light); padding: 20px 0; position: fixed; width: 250px; height: 100vh; overflow-y: auto; transition: transform 0.3s ease-in-out; }
+        .sidebar { background: var(--primary); color: var(--text-light); padding: 20px 0; position: fixed; width: 220px; height: 100vh; overflow-y: auto; transition: transform 0.3s ease-in-out; }
         .logo { text-align: center; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
         .logo h1 { font-size: 24px; font-weight: 600; }
         .menu { list-style: none; padding: 0 15px; }
@@ -200,6 +202,119 @@
     font-size: 12px;
     color: #666;
 }
+
+/* File attachment styles */
+.file-attachment-section {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.file-list {
+    margin-top: 10px;
+}
+
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 8px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.file-item:hover {
+    background-color: #f0f0f0;
+}
+
+.file-actions {
+    display: flex;
+    gap: 5px;
+}
+
+/* Raw materials database styles */
+.raw-material-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.raw-material-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.raw-material-table th, 
+.raw-material-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.raw-material-table th {
+    background-color: var(--primary);
+    color: white;
+}
+
+/* File viewer modal */
+.file-viewer-modal .modal-content {
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.file-viewer-content {
+    width: 100%;
+    height: 80vh;
+    border: none;
+}
+
+.file-viewer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.menu-dropdown .submenu {
+    display: none;
+    list-style: none;
+    padding-left: 25px; /* Indentação para os sub-itens */
+    background: var(--secondary);
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+.menu-dropdown.open .submenu {
+    display: block;
+}
+
+.submenu-link {
+    display: block;
+    padding: 10px 15px;
+    color: var(--text-light);
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.submenu-link:hover {
+    background: var(--primary);
+}
+
+.menu-link .dropdown-icon {
+    margin-left: auto; /* Empurra o ícone para a direita */
+    transition: transform 0.3s ease;
+    font-size: 12px;
+}
+
+.menu-dropdown.open .menu-link .dropdown-icon {
+    transform: rotate(180deg);
+}
         
         @media (max-width: 992px) {
             .container { grid-template-columns: 1fr; }
@@ -209,6 +324,7 @@
             .mobile-menu-btn { display: block; }
             .charts { grid-template-columns: 1fr; }
             .funnel-items { grid-template-columns: 1fr; }
+            .raw-material-form { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -224,6 +340,20 @@
                 <li class="menu-item"><a href="#" class="menu-link" data-tab="kpis"><i class="fas fa-tachometer-alt"></i> KPIs</a></li>
                 <li class="menu-item"><a href="#" class="menu-link" data-tab="management"><i class="fas fa-tasks"></i> Gerenciamento</a></li>
                 <li class="menu-item"><a href="#" class="menu-link" data-tab="reports"><i class="fas fa-chart-pie"></i> Relatórios</a></li>
+                <li class="menu-item menu-dropdown">
+    <a href="#" class="menu-link">
+        <i class="fas fa-calculator"></i> Ofertas <i class="fas fa-chevron-down dropdown-icon"></i>
+    </a>
+    <ul class="submenu">
+        <li class="submenu-item">
+            <a href="./ofertas/Precos - Wall Mounted.html" target="_blank" class="submenu-link">Cotação Wall Mounted</a>
+        </li>
+        <li class="submenu-item">
+            <a href="./ofertas/Precos - UC.html" target="_blank" class="submenu-link">Cotação Unidade Condensadora</a>
+        </li>
+    </ul>
+</li>
+                <li class="menu-item"><a href="#" class="menu-link" data-tab="raw-materials"><i class="fas fa-box"></i> Matérias-Primas</a></li>
                 <li class="menu-item"><a href="#" class="menu-link" data-tab="settings"><i class="fas fa-cog"></i> Configurações</a></li>
             </ul>
         </div>
@@ -258,6 +388,8 @@
                         <button class="btn btn-info" id="resetFiltersBtn"><i class="fas fa-undo"></i> Limpar Filtros</button>
                     </div>
                 </div>
+
+
 <div class="data-table-container">
     <table class="data-table" id="offersTable">
         <thead>
@@ -478,12 +610,85 @@
                 </div>
             </div>
            
-           
+          <div class="tab-content" id="raw-materials">
+    <div class="card">
+        <div class="card-header">
+            <h3>Gerenciamento de Matérias-Primas</h3>
+            <button class="btn btn-primary" id="addRawMaterialBtn"><i class="fas fa-plus"></i> Adicionar Matéria-Prima</button>
+        </div>
+        <div class="raw-material-form" id="rawMaterialForm" style="display: none;">
+            <!-- ... raw material form content ... -->
+        </div>
+        <div class="data-table-container">
+            <table class="raw-material-table" id="rawMaterialsTable">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nome</th>
+                        <th>Categoria</th>
+                        <th>Unidade</th>
+                        <th>Custo Unitário</th>
+                        <th>Fornecedor</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div> 
            
             <div class="tab-content" id="management">
-                <div class="tabs"><div class="tab active" data-subtab="sales-team">Equipe de Vendas</div><div class="tab" data-subtab="customers">Clientes</div></div>
+                <div class="tabs"><div class="tab active" data-subtab="sales-team">Equipe de Vendas</div><div class="tab" data-subtab="customers">Clientes</div><div class="tab" data-subtab="products">Produtos</div></div>
                 <div class="tab-content active" id="sales-team"><button class="btn btn-primary" id="addSalesPersonBtn"><i class="fas fa-plus"></i> Adicionar Vendedor</button><div class="data-table-container"><table class="data-table" id="salesTeamTable"><thead><tr><th>Nome</th><th>Email</th><th>Ações</th></tr></thead><tbody></tbody></table></div></div>
                 <div class="tab-content" id="customers"><button class="btn btn-primary" id="addCustomerBtn"><i class="fas fa-plus"></i> Adicionar Cliente</button><div class="data-table-container"><table class="data-table" id="customersTable"><thead><tr><th>Nome</th><th>Setor</th><th>Contato</th><th>Telefone</th><th>Email</th><th>Ações</th></tr></thead><tbody></tbody></table></div></div>
+              <div class="tab-content" id="products">
+    <div class="tabs">
+        <div class="tab active" data-subtab="product-management">Gerenciamento de Produtos</div>
+        <div class="tab" data-subtab="order-summary">Resumo de Pedidos</div>
+    </div>
+    
+    <div class="tab-content active" id="product-management">
+        <button class="btn btn-primary" id="addProductBtn"><i class="fas fa-plus"></i> Adicionar Produto</button>
+        <div class="data-table-container">
+            <table class="data-table" id="productsTable">
+                <thead>
+                    <tr>
+                        <th>PN</th>
+                        <th>Descrição</th>
+                        <th>Preço</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="tab-content" id="order-summary">
+        <div class="action-buttons" style="margin-bottom: 20px;">
+            <button class="btn btn-primary" id="exportOrderSummaryPdf"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+            <button class="btn btn-success" id="exportOrderSummaryXlsx"><i class="fas fa-file-excel"></i> Exportar XLSX</button>
+        </div>
+        <div class="data-table-container">
+            <table class="data-table" id="orderSummaryTable">
+                <thead>
+                    <tr>
+                        <th>Proposta</th>
+                        <th>Cliente</th>
+                        <th>PN</th>
+                        <th>Descrição</th>
+                        <th>Quantidade</th>
+                        <th>Preço Unitário</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+            
             </div>
             <div class="tab-content" id="reports"><div class="card"><div class="card-header">Relatórios de Vendas<button class="btn btn-primary" id="exportReportsPdf"><i class="fas fa-file-pdf"></i> Exportar para PDF</button></div><div class="charts"><div class="chart-container"><h3 class="card-header">Vendas por Mercado</h3><canvas id="marketChart"></canvas></div><div class="chart-container"><h3 class="card-header">Vendas por Vendedor</h3><canvas id="salesPersonChart"></canvas></div></div><div class="kpi-grid" id="kpi-grid-reports"></div></div></div>
             
@@ -523,20 +728,20 @@
                     <select class="form-select" id="marketSelect" required></select>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">PN Itens (um por linha)</label>
-                    <textarea class="form-textarea" id="pnitemsselect" placeholder="PN-001&#10;PN-002&#10;PN-003"></textarea>
-                </div>
+<div class="form-group">
+    <label class="form-label">PN Itens (um por linha)</label>
+    <textarea class="form-textarea" id="pnitemsselect" placeholder="PN-001&#10;PN-002&#10;PN-003"></textarea>
+</div>
 
-                <div class="form-group">
-                    <label class="form-label">Quantidade (um por linha)</label>
-                    <textarea class="form-textarea" id="quantidadeselect" placeholder="10&#10;5&#10;20"></textarea>
-                </div>
+<div class="form-group">
+    <label class="form-label">Quantidade (um por linha)</label>
+    <textarea class="form-textarea" id="quantidadeselect" placeholder="10&#10;5&#10;20"></textarea>
+</div>
 
-                <div class="form-group">
-                    <label class="form-label">Preço Unitário (um por linha)</label>
-                    <textarea class="form-textarea" id="precoselect" placeholder="150.50&#10;300.00&#10;75.25"></textarea>
-                </div>
+<div class="form-group">
+    <label class="form-label">Preço Unitário (um por linha)</label>
+    <textarea class="form-textarea" id="precoselect" placeholder="150.50&#10;300.00&#10;75.25"></textarea>
+</div>
 
                 <div class="form-group">
                     <label class="form-label">Valor da Proposta</label>
@@ -580,9 +785,36 @@
                 <div class="form-group">
                     <label class="form-label">Comentários</label>
                     <textarea class="form-textarea" id="commentsInput"></textarea>
+                <div class="file-attachment-section">
+                    <h4>Anexos da Proposta</h4>
+                    <div class="form-group">
+                        <label class="form-label">Adicionar Anexo</label>
+                        <input type="file" id="fileAttachment" class="form-input" multiple>
+                        <button type="button" class="btn btn-info" id="uploadFileBtn" style="margin-top: 10px;">
+                            <i class="fas fa-upload"></i> Fazer Upload
+                        </button>
+                    </div>
+                    <div class="file-list" id="fileList">
+                        <p>Nenhum arquivo anexado.</p>
+                    </div>
                 </div>
+                
                 <button type="submit" class="btn btn-primary">Salvar Proposta</button>
             </form>
+        </div>
+    </div>
+
+        <div class="modal file-viewer-modal" id="fileViewerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="fileViewerTitle">Visualizar Arquivo</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <iframe id="fileViewerContent" class="file-viewer-content"></iframe>
+            <div class="file-viewer-actions">
+                <button class="btn btn-primary" id="downloadFileBtn"><i class="fas fa-download"></i> Download</button>
+                <button class="btn btn-secondary" id="closeViewerBtn">Fechar</button>
+            </div>
         </div>
     </div>
 
@@ -644,6 +876,36 @@
         </div>
     </div>
 
+
+
+<div class="modal" id="productModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Adicionar/Editar Produto</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <form id="productForm">
+            <input type="hidden" id="editProductId">
+            <div class="form-group">
+                <label class="form-label">PN (Part Number)</label>
+                <input type="text" class="form-input" id="productPn" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Descrição</label>
+                <textarea class="form-textarea" id="productDescription" required></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Preço Unitário (R$)</label>
+                <input type="number" class="form-input" id="productPrice" min="0" step="0.01" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar Produto</button>
+        </form>
+    </div>
+</div>
+
+
+
+
     <div class="notification" id="notification"></div>
 
     <script>
@@ -657,14 +919,23 @@
         measurementId: "G-186RYW248T"
     };
 
-    // Inicializa o Firebase
     firebase.initializeApp(firebaseConfig);
     const firestore = firebase.firestore();
+    const storage = firebase.storage();
 
     document.addEventListener('DOMContentLoaded', function() {
         // --- DATA MANAGEMENT & STATE ---
-        let db = { offers: [], salesTeam: [], customers: [] };
+        let db = { offers: [], salesTeam: [], customers: [], products: [], rawMaterials: [] };
         let sortState = { column: 'offerNumber', direction: 'asc' };
+        let currentOfferFiles = {}; // Store files for the current offer being edited
+
+        const dropdown = document.querySelector('.menu-dropdown .menu-link');
+    if (dropdown) {
+        dropdown.addEventListener('click', function(e) {
+            e.preventDefault(); // Impede que o link "#" mude a URL
+            this.parentElement.classList.toggle('open');
+        });
+    }
         
         const MARKETS = ['Conforto', 'Industrial', 'Precisão', 'Telecom','Hospitalar', 'Data Center', 'Produtos Customizados'];
         const STATUSES = {
@@ -691,15 +962,19 @@
         async function loadDb() {
             showNotification("Carregando dados da nuvem...");
             try {
-                const [salesTeamSnap, customersSnap, offersSnap] = await Promise.all([
+                const [salesTeamSnap, customersSnap, offersSnap, productsSnap, rawMaterialsSnap] = await Promise.all([
                     firestore.collection('salesTeam').orderBy('name').get(),
                     firestore.collection('customers').orderBy('name').get(),
-                    firestore.collection('offers').get()
+                    firestore.collection('offers').get(),
+                    firestore.collection('products').orderBy('pn').get(),
+                    firestore.collection('rawMaterials').orderBy('code').get()
                 ]);
 
                 db.salesTeam = salesTeamSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 db.customers = customersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 db.offers = offersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                db.products = productsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                db.rawMaterials = rawMaterialsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
                 renderAll();
                 showNotification("Dados carregados com sucesso!", false);
@@ -708,6 +983,12 @@
                 showNotification("Erro ao carregar dados. Verifique o console.", true);
             }
         }
+
+
+
+
+
+
 
         const formatCurrency = (val) => `R$${(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         const generateOfferNumber = () => `PROP-${new Date().getFullYear()}-${String(db.offers.length + 1).padStart(3, '0')}`;
@@ -726,6 +1007,9 @@
             renderOffersTable();
             renderSalesTeamTable();
             renderCustomersTable();
+            renderProductsTable();
+            renderOrderSummaryTable();
+            renderRawMaterialsTable(); // Add this line
             updateAllCharts();
             updateKPIs('kpi-grid-reports');
             renderKpiPage();
@@ -733,6 +1017,9 @@
             populateFunnelFilters();
         }
         
+        
+
+
         function populateSelect(elementId, data, options = {}) {
             const { key = 'id', value = 'name', placeholder = 'Todos' } = options;
             const select = document.getElementById(elementId);
@@ -746,6 +1033,75 @@
             populateSelect('funnel-users', db.salesTeam, { placeholder: 'Todos os Vendedores', value: 'name' });
             populateStaticSelect('funnel-markets', MARKETS, 'Todos os Mercados');
         }
+
+
+
+function renderProductsTable() {
+    const tableBody = document.querySelector('#productsTable tbody');
+    tableBody.innerHTML = '';
+    db.products.forEach(product => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${product.pn}</td>
+            <td>${product.description}</td>
+            <td>${formatCurrency(product.price)}</td>
+            <td class="actions-cell">
+                <button class="btn btn-primary btn-sm" onclick="handleEditProduct('${product.id}')"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="handleDelete(event, 'products', '${product.id}')"><i class="fas fa-trash"></i> Apagar</button>
+            </td>`;
+        tableBody.appendChild(row);
+    });
+}
+
+function renderOrderSummaryTable() {
+    const tableBody = document.querySelector('#orderSummaryTable tbody');
+    tableBody.innerHTML = '';
+    
+    let allItems = [];
+    
+    // Filter offers for 'fechado' status (approved sales)
+    const approvedOffers = db.offers.filter(offer => offer.status === 'fechado');
+    
+    // Collect all items from approved offers
+    approvedOffers.forEach(offer => {
+        const customer = getById(db.customers, offer.customerId)?.name || 'N/A';
+        
+        if (offer.items && Array.isArray(offer.items)) {
+            offer.items.forEach(item => {
+                const product = db.products.find(p => p.pn === item.pn) || {};
+                allItems.push({
+                    offerNumber: offer.offerNumber,
+                    customer: customer,
+                    pn: item.pn,
+                    description: product.description || 'Descrição não disponível', // Use product description from db.products
+                    quantity: item.quantity,
+                    unitPrice: item.unitPrice,
+                    subtotal: item.quantity * item.unitPrice
+                });
+            });
+        }
+    });
+    
+    // Render all items
+    if (allItems.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #777;">Nenhum pedido fechado para exibir.</td></tr>';
+    } else {
+        allItems.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.offerNumber}</td>
+                <td>${item.customer}</td>
+                <td>${item.pn}</td>
+                <td>${item.description}</td>
+                <td>${item.quantity}</td>
+                <td>${formatCurrency(item.unitPrice)}</td>
+                <td>${formatCurrency(item.subtotal)}</td>`;
+            tableBody.appendChild(row);
+        });
+    }
+}
+
+
 
         // Function to render the sales funnel
         function renderSalesFunnelVisualization() {
@@ -862,6 +1218,8 @@
             
             populateSelect('salesPersonSelect', db.salesTeam, { placeholder: 'Selecione um Vendedor' });
             populateSelect('customerSelect', db.customers, { placeholder: 'Selecione um Cliente' });
+
+            populateSelect('productPn', db.products, { placeholder: 'Selecione um PN' });
             
             populateStaticSelect('marketSelect', MARKETS, 'Selecione um Mercado');
             populateStaticSelect('statusSelect', STATUSES, 'Selecione um Status');
@@ -1220,6 +1578,48 @@
                 </div>
             `;
         }
+
+        function renderFileList(offerId) {
+            const fileList = document.getElementById('fileList');
+            const files = currentOfferFiles[offerId] || [];
+            
+            if (!files.length) {
+                fileList.innerHTML = '<p>Nenhum arquivo anexado.</p>';
+                return;
+            }
+            
+            fileList.innerHTML = files.map(file => `
+                <div class="file-item">
+                    <div>
+                        <i class="fas ${getFileIcon(file.type)}"></i>
+                        ${file.name} (${formatFileSize(file.size)})
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-primary btn-sm" onclick="viewFile('${file.url}', '${file.name}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-info btn-sm" onclick="downloadFile('${file.url}', '${file.name}')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteFile('${offerId}', '${file.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+
+        function getFileIcon(type) {
+            if (type.includes('image/')) return 'fa-file-image';
+            if (type.includes('pdf')) return 'fa-file-pdf';
+            if (type.includes('word')) return 'fa-file-word';
+            if (type.includes('excel') || type.includes('spreadsheet')) return 'fa-file-excel';
+            if (type.includes('zip') || type.includes('compressed')) return 'fa-file-archive';
+            return 'fa-file';
+        }
+
+
         
         function updateFunnelOverviewChart(offers) {
             const stageCounts = {};
@@ -1280,15 +1680,15 @@
 
             
 
-            if (offer.items && Array.isArray(offer.items)) {
-                document.getElementById('pnitemsselect').value = offer.items.map(item => item.pn).join('\n');
-                document.getElementById('quantidadeselect').value = offer.items.map(item => item.quantity).join('\n');
-                document.getElementById('precoselect').value = offer.items.map(item => item.unitPrice).join('\n');
-            } else {
-                document.getElementById('pnitemsselect').value = '';
-                document.getElementById('quantidadeselect').value = '';
-                document.getElementById('precoselect').value = '';
-            }
+if (offer.items && Array.isArray(offer.items)) {
+    document.getElementById('pnitemsselect').value = offer.items.map(item => item.pn).join('\n');
+    document.getElementById('quantidadeselect').value = offer.items.map(item => item.quantity).join('\n');
+    document.getElementById('precoselect').value = offer.items.map(item => item.unitPrice).join('\n');
+} else {
+    document.getElementById('pnitemsselect').value = '';
+    document.getElementById('quantidadeselect').value = '';
+    document.getElementById('precoselect').value = '';
+}
             
             openModal('offerModal');
         };
@@ -1368,6 +1768,46 @@
             } catch (error) { showNotification('Erro ao salvar proposta.', true); console.error("Erro: ", error); }
         });
 
+
+document.getElementById('productForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('editProductId').value;
+    const productData = { 
+        pn: document.getElementById('productPn').value,
+        description: document.getElementById('productDescription').value,
+        price: parseFloat(document.getElementById('productPrice').value)
+    };
+    try {
+        if (id) {
+            await firestore.collection('products').doc(id).update(productData);
+        } else {
+            await firestore.collection('products').add(productData);
+        }
+        closeModal('productModal');
+        showNotification('Produto salvo com sucesso!');
+        loadDb();
+    } catch (error) { 
+        showNotification('Erro ao salvar produto.', true); 
+        console.error(error); 
+    }
+});
+
+window.handleEditProduct = (id) => {
+    const product = getById(db.products, id); 
+    if (!product) return;
+    document.getElementById('editProductId').value = product.id;
+    document.getElementById('productPn').value = product.pn;
+    document.getElementById('productDescription').value = product.description;
+    document.getElementById('productPrice').value = product.price;
+    openModal('productModal');
+};
+
+
+
+
+
+
+
         document.getElementById('salesPersonForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('editSalesPersonId').value;
@@ -1410,7 +1850,12 @@
         window.handleDelete = async (event, type, id) => {
             event.stopPropagation();
             if (!confirm(`Tem certeza que deseja apagar este item?`)) return;
-            const collectionName = (type === 'salesTeam' || type === 'customers') ? type : 'offers';
+            let collectionName;
+            if (type === 'salesTeam' || type === 'customers' || type === 'products') {
+                collectionName = type;
+            } else {
+                collectionName = 'offers';
+            }
             try {
                  if (collectionName === 'salesTeam' && db.offers.some(o => o.salesPersonId === id)) {
                     showNotification('Não é possível apagar vendedor com propostas existentes.', true); return;
@@ -1522,6 +1967,119 @@
             showNotification('PDF da proposta exportado!', false);
         };
 
+
+
+function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // View file
+        window.viewFile = (url, name) => {
+            document.getElementById('fileViewerTitle').textContent = name;
+            document.getElementById('fileViewerContent').src = url;
+            document.getElementById('fileViewerModal').style.display = 'flex';
+        };
+
+        // Download file
+        window.downloadFile = (url, name) => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+
+        // Delete file
+        window.deleteFile = async (offerId, fileId) => {
+            if (!confirm('Tem certeza que deseja excluir este arquivo?')) return;
+            
+            try {
+                const file = currentOfferFiles[offerId].find(f => f.id === fileId);
+                if (!file) return;
+                
+                // Delete from Firebase Storage
+                const fileRef = storage.refFromURL(file.url);
+                await fileRef.delete();
+                
+                // Remove from currentOfferFiles
+                currentOfferFiles[offerId] = currentOfferFiles[offerId].filter(f => f.id !== fileId);
+                
+                // Update UI
+                renderFileList(offerId);
+                showNotification('Arquivo excluído com sucesso!');
+            } catch (error) {
+                console.error('Erro ao excluir arquivo:', error);
+                showNotification('Erro ao excluir arquivo.', true);
+            }
+        };
+
+        // Close file viewer
+        document.getElementById('closeViewerBtn').addEventListener('click', () => {
+            document.getElementById('fileViewerModal').style.display = 'none';
+            document.getElementById('fileViewerContent').src = '';
+        });
+
+        // Download file from viewer
+        document.getElementById('downloadFileBtn').addEventListener('click', () => {
+            const url = document.getElementById('fileViewerContent').src;
+            const name = document.getElementById('fileViewerTitle').textContent;
+            downloadFile(url, name);
+        });
+
+        // When opening the offer modal, load files
+        document.getElementById('addOfferBtn').addEventListener('click', () => {
+            document.getElementById('editOfferId').value = '';
+            document.getElementById('fileList').innerHTML = '<p>Nenhum arquivo anexado.</p>';
+            currentOfferFiles = {};
+        });
+
+        // When editing an offer, load its files
+        window.handleEdit = async (id) => {
+            const offer = getById(db.offers, id);
+            if (!offer) return;
+            
+            // Populate form fields (existing code)
+            
+            // Load files for this offer
+            try {
+                const offerId = offer.id;
+                currentOfferFiles[offerId] = [];
+                
+                // List files in the offer's folder
+                const storageRef = storage.ref();
+                const offerFilesRef = storageRef.child(`offers/${offerId}`);
+                const files = await offerFilesRef.listAll();
+                
+                for (const fileRef of files.items) {
+                    const metadata = await fileRef.getMetadata();
+                    const url = await fileRef.getDownloadURL();
+                    
+                    currentOfferFiles[offerId].push({
+                        id: fileRef.name.split('_')[0],
+                        name: metadata.name,
+                        type: metadata.contentType,
+                        size: metadata.size,
+                        url: url,
+                        uploadedAt: metadata.timeCreated
+                    });
+                }
+                
+                renderFileList(offerId);
+            } catch (error) {
+                console.error('Erro ao carregar arquivos:', error);
+                currentOfferFiles[offerId] = [];
+                renderFileList(offerId);
+            }
+        };
+
+
+
+
         function parseDate(dateString) {
             if (!dateString) return '';
             if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
@@ -1561,7 +2119,8 @@
                 'Lembrete': o.reminderDate, 
                 'Comentários': o.comments
             }));
-            
+
+            const productsSheet = db.products.map(p => ({'PN': p.pn,'Descrição': p.description, 'Preço': p.price  }));
             const salesTeamSheet = db.salesTeam.map(({id, ...rest}) => rest);
             const customersSheet = db.customers.map(c => ({ 'Nome': c.name, 'Setor': c.industry, 'Nome do Contato': c.contactName || '', 'Telefone': c.contactPhone || '', 'Email': c.contactEmail || '', 'Departamento': c.contactDepartment || '' }));
             
@@ -1569,6 +2128,7 @@
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(offersSheet), "Ofertas");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(salesTeamSheet), "Vendedores");
             XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(customersSheet), "Clientes");
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(productsSheet), "Produtos");
             XLSX.writeFile(wb, "crm_backup.xlsx");
             showNotification("Backup em XLSX exportado!");
         });
@@ -1597,9 +2157,10 @@
                         await clearAllData();
                         
                         const workbook = XLSX.read(new Uint8Array(event.target.result), {type: 'array'});
-                        if (!workbook.Sheets['Vendedores'] || !workbook.Sheets['Clientes'] || !workbook.Sheets['Ofertas']) {
-                            throw new Error("O arquivo Excel deve conter as planilhas: Vendedores, Clientes e Ofertas");
-                        }
+        if (!workbook.Sheets['Vendedores'] || !workbook.Sheets['Clientes'] || !workbook.Sheets['Ofertas'] || !workbook.Sheets['Produtos']) {
+            throw new Error("O arquivo Excel deve conter as planilhas: Vendedores, Clientes, Ofertas e Produtos");
+        }
+
                         
                         const salesTeamData = XLSX.utils.sheet_to_json(workbook.Sheets['Vendedores']);
                         for (const person of salesTeamData) {
@@ -1636,6 +2197,22 @@
                                 } catch (err) { console.warn("JSON de itens inválido:", offer['Proposta #']); items = []; }
                             }
 
+
+        const productsData = XLSX.utils.sheet_to_json(workbook.Sheets['Produtos']);
+        for (const product of productsData) {
+            if (product.PN && product.Descrição && product.Preço !== undefined) {
+                await firestore.collection('products').add({ 
+                    pn: product.PN, 
+                    description: product.Descrição, 
+                    price: parseFloat(product.Preço) 
+                });
+            }
+        }
+
+
+
+
+
                             const offerPayload = {
                                 offerNumber: offer['Proposta #'], salesPersonId: salesPerson.id, customerId: customer.id, market: offer['Mercado'],
                                 value: parseFloat(offer['Valor'] || 0), offerDate: parseDate(offer['Data da Proposta']) || '', closingDate: parseDate(offer['Data de Fechamento']) || '',
@@ -1657,6 +2234,104 @@
             };
             input.click();
         });
+
+
+
+
+document.getElementById('exportOrderSummaryXlsx').addEventListener('click', () => {
+    let allItems = [];
+    
+    // Collect all items from all offers
+    db.offers.forEach(offer => {
+        const customer = getById(db.customers, offer.customerId)?.name || 'N/A';
+        
+        if (offer.items && Array.isArray(offer.items)) {
+            offer.items.forEach(item => {
+                const product = db.products.find(p => p.pn === item.pn) || {};
+                allItems.push({
+                    'Proposta': offer.offerNumber,
+                    'Cliente': customer,
+                    'PN': item.pn,
+                    'Descrição': product.description || 'Descrição não disponível',
+                    'Quantidade': item.quantity,
+                    'Preço Unitário': item.unitPrice,
+                    'Subtotal': item.quantity * item.unitPrice
+                });
+            });
+        }
+    });
+    
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allItems), "Resumo de Pedidos");
+    XLSX.writeFile(wb, "resumo_pedidos.xlsx");
+    showNotification("Resumo de pedidos exportado para XLSX!");
+});
+
+document.getElementById('exportOrderSummaryPdf').addEventListener('click', async () => {
+    showNotification('Gerando PDF do resumo de pedidos...');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    
+    pdf.setFontSize(16).setFont(undefined, 'bold');
+    pdf.text('Resumo de Pedidos', 148, 15, { align: 'center' });
+    pdf.setFontSize(10).setFont(undefined, 'normal');
+    pdf.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 148, 22, { align: 'center' });
+    
+    // Get table data
+    let allItems = [];
+    db.offers.forEach(offer => {
+        const customer = getById(db.customers, offer.customerId)?.name || 'N/A';
+        if (offer.items && Array.isArray(offer.items)) {
+            offer.items.forEach(item => {
+                const product = db.products.find(p => p.pn === item.pn) || {};
+                allItems.push({
+                    offerNumber: offer.offerNumber,
+                    customer: customer,
+                    pn: item.pn,
+                    description: product.description || 'Descrição não disponível',
+                    quantity: item.quantity,
+                    unitPrice: item.unitPrice,
+                    subtotal: item.quantity * item.unitPrice
+                });
+            });
+        }
+    });
+    
+    // Create table
+    const tableColumn = ["Proposta", "Cliente", "PN", "Descrição", "Quantidade", "Preço Unitário", "Subtotal"];
+    const tableRows = [];
+    
+    allItems.forEach(item => {
+        const itemData = [
+            item.offerNumber,
+            item.customer,
+            item.pn,
+            item.description,
+            item.quantity.toString(),
+            formatCurrency(item.unitPrice),
+            formatCurrency(item.subtotal)
+        ];
+        tableRows.push(itemData);
+    });
+    
+    // Add table to PDF
+    pdf.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 30,
+        theme: 'grid',
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [41, 128, 185] }
+    });
+    
+    pdf.save('resumo_pedidos.pdf');
+    showNotification('PDF do resumo de pedidos exportado com sucesso!');
+});
+
+
+
+
+
 
         document.getElementById('exportFunnelXlsx').addEventListener('click', () => {
             const salesPersonFilter = document.getElementById('funnelSalesPersonFilter').value;
@@ -1716,7 +2391,7 @@
 
         async function clearAllData() {
             showNotification("Limpando banco de dados...");
-            await Promise.all([ clearCollection('offers'), clearCollection('customers'), clearCollection('salesTeam') ]);
+            await Promise.all([ clearCollection('offers'), clearCollection('customers'), clearCollection('salesTeam'),clearCollection('products')  ]);
         }
 
         document.getElementById('clearDbBtn').addEventListener('click', async () => {
@@ -1731,6 +2406,12 @@
                 }
             }
         });
+
+        document.getElementById('addProductBtn').addEventListener('click', () => { 
+    document.getElementById('productForm').reset();
+    document.getElementById('editProductId').value = '';
+    openModal('productModal');
+});
         
         document.getElementById('addOfferBtn').addEventListener('click', () => { 
             document.getElementById('offerForm').reset();
@@ -1782,6 +2463,8 @@
                 document.querySelector('.page-title').textContent = e.currentTarget.textContent.trim();
                 if (window.innerWidth <= 992) document.getElementById('sidebar').classList.remove('active');
                 if (tabId === 'sales-funnel') renderSalesFunnel();
+                if (tabId === 'products') { renderOrderSummaryTable();
+}
             });
         });
         
