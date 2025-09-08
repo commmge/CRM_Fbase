@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cálculo de Preços - WM/WMH</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+        .col {
+            flex: 1;
+            padding: 0 10px;
+            min-width: 200px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result-section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .result-total {
+            font-weight: bold;
+            font-size: 1.2em;
+            border-top: 2px solid #3498db;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        .part-number {
+            font-family: monospace;
+            font-size: 1.1em;
+            background-color: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .hidden {
+            display: none;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: #eee;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .pn-input-section {
+            margin-bottom: 20px;
+        }
+        .pn-input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .pn-input-row input {
+            flex: 1;
+        }
+        .pn-input-row button {
+            width: auto;
+        }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .product-image-selector {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .product-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .product-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 4px;
+        }
+        .product-image.selected {
+            border-color: #3498db;
+        }
+        .image-preview {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .image-preview img {
+            max-width: 300px;
+            max-height: 200px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .pdf-filename {
+            margin-top: 20px;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .pdf-filename-container {
+            margin-top: 20px;
+        }
+        .customer-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .export-options {
+            margin-top: 20px;
+        }
+
+            .result-discount-3 {
+        background-color: #fffde7; /* Light yellow */
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 5px;
+        border-left: 4px solid #ffd600;
+    }
+    .result-discount-5 {
+        background-color: #ffebee; /* Light red */
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 5px;
+        border-left: 4px solid #ff5252;
+    }
+    .result-total {
+        background-color: #e8f5e9; /* Light green */
+        padding: 10px;
+        border-radius: 5px;
+        border-left: 4px solid #4caf50;
+    }
+
+    .result-item input[type="radio"] {
+    margin-right: 8px;
+}
+
+.result-item label {
+    font-weight: normal;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+
+    </style>
+    <!-- Add jsPDF library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <!-- Add Excel export library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Sistema de Cálculo de Preços - WM/WMH</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="openTab(event, 'calculator')">Calculadora</div>
+            <div class="tab" onclick="openTab(event, 'database')">Banco de Dados</div>
+        </div>
+        
+        <div id="calculator" class="tab-content active">
+            <div class="customer-info">
+                <h2>Informações do Cliente</h2>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="customerName">Nome do Cliente:</label>
+                            <input type="text" id="customerName" placeholder="Nome completo ou razão social">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="companyName">Empresa:</label>
+                            <input type="text" id="companyName" placeholder="Nome da empresa">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="offerNumber">Número da Oferta:</label>
+                            <input type="text" id="offerNumber" placeholder="Número da oferta">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="customerAddress">Endereço:</label>
+                    <input type="text" id="customerAddress" placeholder="Endereço completo">
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="customerEmail">Email:</label>
+                            <input type="email" id="customerEmail" placeholder="Email do cliente">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="customerPhone">Telefone:</label>
+                            <input type="tel" id="customerPhone" placeholder="Telefone de contato">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>Configuração do Equipamento</h2>
+
+                <div class="form-group">
+                    <!-- Removed "Carregar Dados Padrão" button -->
+                    <button onclick="clearLocalData()">Limpar Dados Locais</button>
+                </div>
+                
+                <div class="pn-input-section">
+                    <div class="form-group">
+                        <label for="fullPartNumber">Ou insira o Part Number completo:</label>
+                        <div class="pn-input-row">
+                            <input type="text" id="fullPartNumber" placeholder="Ex: WM-EE-20-S-A-7-M-B-A-E-P-P-G-P-P-F-D-P">
+                            <button onclick="parsePartNumber()">Aplicar</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="productLine">Linha de Produto:</label>
+                            <select id="productLine" onchange="updatePartNumber()">
+                                <option value="WM">WM - Wall Mounted</option>
+                                <option value="WMH">WMH - Wall Mounted Horizontal</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="mountType">Tipo de Montagem:</label>
+                            <select id="mountType" onchange="updatePartNumber()">
+                                <option value="EE">EE - Externa/Painel Elétrico Externo (Padrão)</option>
+                                <option value="EI">EI - Externa/Painel Elétrico Interno</option>
+                                <option value="II">II - Interna/Painel Elétrico Interno</option>
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="capacity">Capacidade (TR):</label>
+                            <select id="capacity" onchange="updatePartNumber(); updateCosts()">
+                                <option value="1">1 - 1TR</option>
+                                <option value="2">2 - 2TR</option>
+                                <option value="3">3 - 3TR</option>
+                                <option value="4">4 - 4TR</option>
+                                <option value="5">5 - 5TR</option>
+                                <option value="7">7.5 - 7.5TR</option>
+                                <option value="10">10 - 10TR</option>
+                                <option value="12">12.5 - 12.5TR</option>
+                                <option value="15">15 - 15TR</option>
+                                <option value="20">20 - 20TR</option>
+                                <option value="25">25 - 25TR</option>
+                                <option value="30">30 - 30TR</option>
+                                <option value="40">40 - 40TR</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="insuflamento">Insuflamento:</label>
+                            <select id="insuflamento" onchange="updatePartNumber()">
+                                <option value="I">I - Inferior Frontal</option>
+                                <option value="S">S - Superior Frontal (Padrão)</option>
+                                <option value="T">T - Topo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="condensacao">Condensação:</label>
+                            <select id="condensacao" onchange="updatePartNumber()">
+                                <option value="A">A - Ar</option>
+                                <option value="W">W - Água</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="tensao">Tensão de Alimentação:</label>
+                            <select id="tensao" onchange="updatePartNumber()">
+                                <option value="1">1 - 220/1/60Hz</option>
+                                <option value="2">2 - 220/3/60Hz</option>
+                                <option value="3">3 - 380/3/60Hz</option>
+                                <option value="4">4 - 440/3/60Hz</option>
+                                <option value="5">5 - 480/3/60Hz</option>
+                                <option value="6">6 - 460/3/60Hz</option>
+                                <option value="7">7 - 400/3/60Hz</option>
+                                <option value="8">8 - 220/1/50Hz</option>
+                                <option value="9">9 - 220/3/50Hz</option>
+                                <option value="A">A - 380/3/50Hz</option>
+                                <option value="B">B - 440/3/50Hz</option>
+                                <option value="C">C - 480/3/50Hz</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="controle">Controle:</label>
+                            <select id="controle" onchange="updatePartNumber()">
+                                <option value="P">P - Pressostato (Padrão)</option>
+                                <option value="M">M - CLP Microprocessado PGD</option>
+                                <option value="R">R - CLP Reserva Microprocessado PGD</option>
+                                <option value="O">O - CLP Operante Microprocessado PGD(somente acima de N+2)</option>                                
+                                <option value="T">T - Microprocessado ThTune</option>
+                                <option value="C">C - Microchiller</option>
+                                <option value="X">X - Nao se aplica</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="compressor">Compressor:</label>
+                            <select id="compressor" onchange="updatePartNumber()">
+                                <option value="F">F - Fixo</option>
+                                <option value="U">U - Fixo 1 Circuito (Padrão)</option>
+                                <option value="D">D - Fixo 2 Circuitos</option>
+                                <option value="T">T - Fixo 3 Circuitos</option>
+                                <option value="X">X - Sem Compressor</option>
+                                <option value="I">I - Inverter</option>
+                                <option value="A">A - Inverter 1 Circuito</option>
+                                <option value="B">B - Inverter 2 Circuitos</option>
+                                <option value="C">C - Inverter 3 Circuitos</option>
+                                <option value="K">K - BLDC 1 Circuito</option>
+                                <option value="Y">Y - BLDC 2 Circuito</option>
+                                <option value="Z">Z - BLDC 3 Circuito</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="fluido">Fluido Refrigerante:</label>
+                            <select id="fluido" onchange="updatePartNumber()">
+                                <option value="A">A - Especial</option>
+                                <option value="B">B - R410A (Padrão)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="reaquecimento">Reaquecimento:</label>
+                            <select id="reaquecimento" onchange="updatePartNumber()">
+                                <option value="E">E - Elétrico</option>
+                                <option value="H">H - Água Quente</option>
+                                <option value="EH">EH - Elétrico + Água Quente</option>
+                                <option value="X">X - Sem Reaquecimento (Padrão)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="umidificacao">Umidificação:</label>
+                            <select id="umidificacao" onchange="updatePartNumber()">
+                                <option value="P">P - Padrão</option>
+                                <option value="U">U - Ultrassônico</option>
+                                <option value="D">D - Desumidificacao</option>
+                                <option value="PD">PD - Padrão + Desumidificacao</option>
+                                <option value="X">X - Sem Umidificação (Padrão)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="damper">Damper:</label>
+                            <select id="damper" onchange="updatePartNumber()">
+                                <option value="D">D - Emergencia</option>
+                                <option value="F">F - Free Cooling</option>
+                                <option value="P">P - Pressurização</option>
+                                <option value="X">X - Nao se aplica (Padrao)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="filtro">Filtro de Ar:</label>
+                            <select id="filtro" onchange="updatePartNumber()">
+                                <option value="F">F - M5 Plissado</option>
+                                <option value="G">G - G4 Plissado (Padrão)</option>
+                                <option value="E">E - Especial</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="ventilador">Ventilador Evaporador:</label>
+                            <select id="ventilador" onchange="updatePartNumber()">
+                                <option value="P">P - Centrífugo Sirocco (Padrão)</option>
+                                <option value="R">R - Centrífugo Radial</option>
+                                <option value="L">L - Limit load</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="acabamento">Acabamento:</label>
+                            <select id="acabamento" onchange="updatePartNumber()">
+                                <option value="P">P - Pintura Epóxi (Padrão)</option>
+                                <option value="E">E - Especial</option>
+                                <option value="I">I - Inox</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="controleCondensacao">Controle Condensação:</label>
+                            <select id="controleCondensacao" onchange="updatePartNumber()">
+                                <option value="F">F - ON/OFF</option>
+                                <option value="P">P - Proporcional</option>
+                                <option value="X">X - Não se aplica (Padrão)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="aplicacao">Aplicação:</label>
+                            <select id="aplicacao" onchange="updatePartNumber()">
+                                <option value="D">D - Duto</option>
+                                <option value="P">P - Direto no ambiente c/grelha (Padrão)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="tipoEquipamento">Tipo de Equipamento:</label>
+                            <select id="tipoEquipamento" onchange="updatePartNumber()">
+                                <option value="P">P - Padrão</option>
+                                <option value="E">E - Especial</option>
+                                <option value="W">W - Padrão</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Part Number Gerado:</label>
+                    <div class="part-number" id="partNumber">WM-EE-20-S-A-7-M-B-A-E-P-P-G-P-P-F-D-P</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>Custos e Margens</h2>
+
+
+<div class="row">
+    <div class="col">
+        <div class="form-group">
+            <label for="priceRaise2026">Aumento de Preço 2026 (%):</label>
+            <input type="number" id="priceRaise2026" value="0" step="0.01" onchange="updateCosts()">
+        </div>
+    </div>
+    <div class="col">
+        <div class="form-group">
+            <label for="priceRaise2027">Aumento de Preço 2027 (%):</label>
+            <input type="number" id="priceRaise2027" value="0" step="0.01" onchange="updateCosts()">
+        </div>
+    </div>
+    <div class="col">
+        <div class="form-group">
+            <label for="priceRaise2028">Aumento de Preço 2028 (%):</label>
+            <input type="number" id="priceRaise2028" value="0" step="0.01" onchange="updateCosts()">
+        </div>
+    </div>
+</div>
+
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="pis">PIS (%):</label>
+                            <input type="number" id="pis" value="3" step="0.01" onchange="updateCosts()">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="cofins">COFINS (%):</label>
+                            <input type="number" id="cofins" value="0.65" step="0.01" onchange="updateCosts()">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="icms">ICMS (%):</label>
+                            <input type="number" id="icms" value="8.8" step="0.01" onchange="updateCosts()">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="irpj">IRPJ (%):</label>
+                            <input type="number" id="irpj" value="1.2" step="0.01" onchange="updateCosts()">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="csll">CSLL (%):</label>
+                            <input type="number" id="csll" value="1.08" step="0.01" onchange="updateCosts()">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="ipi">IPI (%):</label>
+                            <input type="number" id="ipi" value="0" step="0.01" onchange="updateCosts()">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="comissao">Comissão (%):</label>
+                            <input type="number" id="comissao" value="5" step="0.01" onchange="updateCosts()">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="outros">Outros (%):</label>
+                            <input type="number" id="outros" value="3" step="0.01" onchange="updateCosts()">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button onclick="calculatePrice()">Calcular Preço</button>
+                    <button onclick="generatePDF()" style="background-color: #e74c3c;">Gerar PDF</button>
+                    <button onclick="exportToExcel()" style="background-color: #2ecc71;">Exportar para Excel</button>
+                </div>
+                
+<div class="result-section" id="resultSection">
+    <h3>Resultado do Cálculo</h3>
+    <div id="costBreakdown"></div>
+    <div class="result-item result-total">
+        <span>
+            <input type="radio" name="selectedPrice" id="selectFinalPrice" value="final" checked>
+            <label for="selectFinalPrice">Preço Final:</label>
+        </span>
+        <span id="finalPrice">R$ 0,00</span>
+    </div>
+    <div class="result-item result-discount-3">
+        <span>
+            <input type="radio" name="selectedPrice" id="selectDiscount3" value="discount3">
+            <label for="selectDiscount3">Preço com 3% de desconto:</label>
+        </span>
+        <span id="discount3Price">R$ 0,00</span>
+    </div>
+    <div class="result-item result-discount-5">
+        <span>
+            <input type="radio" name="selectedPrice" id="selectDiscount5" value="discount5">
+            <label for="selectDiscount5">Preço com 5% de desconto:</label>
+        </span>
+        <span id="discount5Price">R$ 0,00</span>
+    </div>
+</div>
+
+
+            
+            <div class="export-options">
+                <h3>Observações</h3>
+                <textarea id="offerNotes" rows="4" placeholder="Adicione observações sobre a oferta, como condições de pagamento, prazos de entrega, etc." style="width: 100%;"></textarea>
+            </div>
+        </div>
+        
+        <div id="database" class="tab-content">
+            <div class="section">
+                <h2>Banco de Dados de Custos</h2>
+                <p>Esta seção mostra os dados de custo carregados no banco de dados local.</p>
+                
+                <div class="form-group">
+                    <label for="dataTableSelect">Selecione a tabela:</label>
+                    <select id="dataTableSelect" onchange="showSelectedTable()">
+                        <option value="TIPO DE MONTAGEM">TIPO DE MONTAGEM</option>
+                        <option value="CAPACIDADE">CAPACIDADE</option>
+                        <option value="INSUFLAMENTO">INSUFLAMENTO</option>
+                        <option value="CONDENSAÇÃO">CONDENSAÇÃO</option>
+                        <option value="TENSÃO ALIMENTAÇÃO">TENSÃO ALIMENTAÇÃO</option>
+                        <option value="CONTROLE">CONTROLE</option>
+                        <option value="COMPRESSOR">COMPRESSOR</option>
+                        <option value="FLUIDO REFRIGERANTE">FLUIDO REFRIGERANTE</option>
+                        <option value="REAQUECIMENTO">REAQUECIMENTO</option>
+                        <option value="UMIDIFICACAO">UMIDIFICAÇÃO</option>
+                        <option value="DAMPER">DAMPER</option>
+                        <option value="FILTRO DE AR">FILTRO DE AR</option>
+                        <option value="VENTILADOR EVAPORADOR">VENTILADOR EVAPORADOR</option>
+                        <option value="ACABAMENTO">ACABAMENTO</option>
+                        <option value="CONTROLE DE CONDENSAÇÃO">CONTROLE DE CONDENSAÇÃO</option>
+                        <option value="APLICACAO">APLICAÇÃO</option>
+                        <option value="TIPO DE EQUIPAMENTO">TIPO DE EQUIPAMENTO</option>
+                    </select>
+                </div>
+                
+                <div id="dataTableContainer"></div>
+                
+                <div class="form-group">
+                    <!-- Removed "Carregar Dados Padrão" button -->
+                    <button onclick="clearLocalData()">Limpar Dados Locais</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize jsPDF
+        const { jsPDF } = window.jspdf;
+        
+        // Function to open tabs
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+
+            if (!window.costDatabase) {
+            window.costDatabase = { ...defaultCostDatabase };
+             }
+            
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].className = tabcontent[i].className.replace(" active", "");
+            }
+            
+            tablinks = document.getElementsByClassName("tab");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            
+            document.getElementById(tabName).className += " active";
+            evt.currentTarget.className += " active";
+                if (tabName === 'database') {
+        showSelectedTable();
+        }
+        }
+
+        // Default cost database structure
+        const defaultCostDatabase = {
+            "TIPO DE MONTAGEM": {
+                "1":  {"EE": 0, "EI": 0, "II": 0, "V1": 0, "V2": 0, "V3": 0},
+                "2":  {"EE": 0, "EI": 0, "II": 0, "V1": 0, "V2": 0, "V3": 0},
+                "3":  {"EE": 0, "EI": 0, "II": 0, "V1": 0, "V2": 0, "V3": 0},
+                "4":  {"EE": 0, "EI": 0, "II": 0, "V1": 0, "V2": 0, "V3": 0},
+                "5":  {"EE": 0, "EI": 0, "II": 0, "V1": 0, "V2": 0, "V3": 0},
+                "7":  {"EE": 0, "EI": 0, "II": 0, "V1": 0, "V2": 0, "V3": 0},
+                "10": {"EE": 0, "EI": 0, "II": 0, "V1": 0, "V2": 0, "V3": 0},
+                "12": {"EE": 0, "EI": 0, "II": 0, "V1": 0, "V2": 0, "V3": 0},
+                "15": {"EE": 0, "EI": 0, "II": 0, "V1": 0, "V2": 0, "V3": 0},
+                "20": {"EE": 0, "EI": 0, "II": 0, "V1": 0, "V2": 0, "V3": 0},
+                "25": {"EE": 0, "EI": 0, "II": 0, "V1": 0, "V2": 0, "V3": 0},
+                "30": {"EE": 0, "EI": 0, "II": 0, "V1": 0, "V2": 0, "V3": 0},
+                "40": {"EE": 0, "EI": 0, "II": 0, "V1": 0, "V2": 0, "V3": 0}
+            },
+            "CAPACIDADE": {
+                "1":  23923,
+                "2":  28000,
+                "3":  31200,
+                "4":  33400,
+                "5":  34690,
+                "7":  38900,
+                "10": 47900,
+                "12": 49500,
+                "15": 53200,
+                "20": 58750,
+                "25": 66100,
+                "30": 71900,
+                "40": 105000
+            },
+            "INSUFLAMENTO": {
+                "1":  {"I": 0, "S": 0, "T": 0},
+                "2":  {"I": 0, "S": 0, "T": 0},
+                "3":  {"I": 0, "S": 0, "T": 0},
+                "4":  {"I": 0, "S": 0, "T": 0},
+                "5":  {"I": 0, "S": 0, "T": 0},
+                "7":  {"I": 0, "S": 0, "T": 0},
+                "10": {"I": 0, "S": 0, "T": 0},
+                "12": {"I": 0, "S": 0, "T": 0},
+                "15": {"I": 0, "S": 0, "T": 0},
+                "20": {"I": 0, "S": 0, "T": 0},
+                "25": {"I": 0, "S": 0, "T": 0},
+                "30": {"I": 0, "S": 0, "T": 0},
+                "40": {"I": 0, "S": 0, "T": 0}
+            },
+            "CONDENSAÇÃO": {
+                "1":  {"A": 0, "W": 0},
+                "2":  {"A": 0, "W": 0},
+                "3":  {"A": 0, "W": 0},
+                "4":  {"A": 0, "W": 0},
+                "5":  {"A": 0, "W": 0},
+                "7":  {"A": 0, "W": 0},
+                "10": {"A": 0, "W": 0},
+                "12": {"A": 0, "W": 0},
+                "15": {"A": 0, "W": 0},
+                "20": {"A": 0, "W": 0},
+                "25": {"A": 0, "W": 0},
+                "30": {"A": 0, "W": 0},
+                "40": {"A": 0, "W": 0}
+            },
+            "TENSÃO ALIMENTAÇÃO": {
+                "1":  {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "A": 0, "B": 0, "C": 0},
+                "2":  {"1": 0, "2": 0, "3": 1100, "4": 1100, "5": 1100, "6": 1100, "7": 1100, "8": 0, "9": 0, "A": 1100, "B": 1100, "C": 1100},
+                "3":  {"1": 0, "2": 0, "3": 1200, "4": 1200, "5": 1200, "6": 1200, "7": 1200, "8": 0, "9": 0, "A": 1200, "B": 1200, "C": 1200},
+                "4":  {"1": 0, "2": 0, "3": 1270, "4": 1270, "5": 1270, "6": 1270, "7": 1270, "8": 0, "9": 0, "A": 1270, "B": 1270, "C": 1270},
+                "5":  {"1": 0, "2": 0, "3": 1310, "4": 1310, "5": 1310, "6": 1310, "7": 1310, "8": 0, "9": 0, "A": 1310, "B": 1310, "C": 1310},
+                "7":  {"1": 0, "2": 0, "3": 1400, "4": 1400, "5": 1400, "6": 1400, "7": 1400, "8": 0, "9": 0, "A": 1400, "B": 1400, "C": 1400},
+                "10": {"1": 0, "2": 0, "3": 1800, "4": 1800, "5": 1800, "6": 1800, "7": 1800, "8": 0, "9": 0, "A": 1800, "B": 1800, "C": 1800},
+                "12": {"1": 0, "2": 0, "3": 1750, "4": 1750, "5": 1750, "6": 1750, "7": 1750, "8": 0, "9": 0, "A": 1750, "B": 1750, "C": 1750},
+                "15": {"1": 0, "2": 0, "3": 2200, "4": 2200, "5": 2200, "6": 2200, "7": 2200, "8": 0, "9": 0, "A": 2200, "B": 2200, "C": 2200},
+                "20": {"1": 0, "2": 0, "3": 2410, "4": 2410, "5": 2410, "6": 2410, "7": 2410, "8": 0, "9": 0, "A": 2410, "B": 2410, "C": 2410},
+                "25": {"1": 0, "2": 0, "3": 2700, "4": 2700, "5": 2700, "6": 2700, "7": 2700, "8": 0, "9": 0, "A": 2700, "B": 2700, "C": 2700},
+                "30": {"1": 0, "2": 0, "3": 3300, "4": 3300, "5": 3300, "6": 3300, "7": 3300, "8": 0, "9": 0, "A": 3300, "B": 3300, "C": 3300},
+                "40": {"1": 0, "2": 0, "3": 3300, "4": 3300, "5": 3300, "6": 3300, "7": 3300, "8": 0, "9": 0, "A": 3300, "B": 3300, "C": 3300}
+            },
+            "CONTROLE": {
+                "1":  {"P": 0, "M": 3400, "R": 3400, "O": 5400,"T": 2200, "C": 1800, "X": 0},
+                "2":  {"P": 0, "M": 3400, "R": 3400, "O": 5400, "T": 2200, "C": 1800, "X": 0},
+                "3":  {"P": 0, "M": 3400, "R": 3400, "O": 5400, "T": 2200, "C": 1800, "X": 0},
+                "4":  {"P": 0, "M": 3400, "R": 3400, "O": 5400, "T": 2200, "C": 1800, "X": 0},
+                "5":  {"P": 0, "M": 3400, "R": 3400, "O": 5400, "T": 2200, "C": 1800, "X": 0},
+                "7":  {"P": 0, "M": 3400, "R": 3400, "O": 5400, "T": 2200, "C": 1800, "X": 0},
+                "10": {"P": 0, "M": 3400, "R": 3400, "O": 5400, "T": 2200, "C": 1800, "X": 0},
+                "12": {"P": 0, "M": 3800, "R": 3400, "O": 5400, "T": 2800, "C": 2000, "X": 0},
+                "15": {"P": 0, "M": 3800, "R": 3400, "O": 5400, "T": 2800, "C": 2000, "X": 0},
+                "20": {"P": 0, "M": 3800, "R": 3400, "O": 5400, "T": 2800, "C": 2000, "X": 0},
+                "25": {"P": 0, "M": 3800, "R": 3400, "O": 5400, "T": 2800, "C": 2000, "X": 0},
+                "30": {"P": 0, "M": 3800, "R": 3400, "O": 5400, "T": 2800, "C": 2000, "X": 0},
+                "40": {"P": 0, "M": 3800, "R": 3400, "O": 5400, "T": 2800, "C": 2000, "X": 0}
+            },
+            "COMPRESSOR": {
+                "1":  {"F": 0, "U": 0, "D": 896, "T": 1792, "X": 0, "I": 2000, "A": 2000, "B": 2000, "C": 2000, "K": 2000, "Y": 2000, "Z": 2000},
+                "2":  {"F": 0, "U": 0, "D": 1100, "T": 2200, "X": 0, "I": 5200, "A": 5200, "B": 6200, "C": 8200, "K": 4200, "Y": 4200, "Z": 4200},
+                "3":  {"F": 0, "U": 0, "D": 1160, "T": 2320, "X": 0, "I": 7600, "A": 7600, "B": 8600, "C": 10600, "K": 6600, "Y": 8600, "Z": 9600},
+                "4":  {"F": 0, "U": 0, "D": 1210, "T": 2420, "X": 0, "I": 8200, "A": 8200, "B": 9200, "C": 11200, "K": 7200, "Y": 9200, "Z": 11200},
+                "5":  {"F": 0, "U": 0, "D": 1259, "T": 2519, "X": 0, "I": 9250, "A": 9250, "B": 10250, "C": 12250, "K": 18250, "Y": 18250, "Z": 18250},
+                "7":  {"F": 0, "U": 0, "D": 1415, "T": 2830, "X": 0, "I": 9250, "A": 9250, "B": 10250, "C": 12250, "K": 18250, "Y": 18250, "Z": 18250},
+                "10": {"F": 0, "U": 0, "D": 1415, "T": 2830, "X": 0, "I": 10250, "A": 10250, "B": 11250, "C": 13250, "K": 18250, "Y": 18250, "Z": 18250},
+                "12": {"F": 0, "U": 0, "D": 1415, "T": 2830, "X": 0, "I": 13000, "A": 13000, "B": 13250, "C": 15250, "K": 18250, "Y": 18250, "Z": 18250},
+                "15": {"F": 0, "U": 0, "D": 1415, "T": 2830, "X": 0, "I": 16000, "A": 16000, "B": 17000, "C": 19250, "K": 18250, "Y": 18250, "Z": 18250},
+                "20": {"F": 0, "U": 0, "D": 1415, "T": 2830, "X": 0, "I": 16000, "A": 16000, "B": 17000, "C": 19250, "K": 18250, "Y": 18250, "Z": 18250},
+                "25": {"F": 0, "U": 0, "D": 1415, "T": 2830, "X": 0, "I": 16000, "A": 16000, "B": 17000, "C": 19250, "K": 18250, "Y": 18250, "Z": 18250},
+                "30": {"F": 0, "U": 0, "D": 1415, "T": 2830, "X": 0, "I": 16000, "A": 16000, "B": 17000, "C": 19250, "K": 18250, "Y": 18250, "Z": 18250},                
+                "40": {"F": 0, "U": 0, "D": 1415, "T": 2830, "X": 0, "I": 26000, "A": 26000, "B": 27000, "C": 29250, "K": 28250, "Y": 28250, "Z": 28250}
+            },
+            "FLUIDO REFRIGERANTE": {
+                "1":  {"A": 0, "B": 0},
+                "2":  {"A": 0, "B": 0},
+                "3":  {"A": 0, "B": 0},
+                "4":  {"A": 0, "B": 0},
+                "5":  {"A": 0, "B": 0},
+                "7":  {"A": 0, "B": 0},
+                "10": {"A": 0, "B": 0},
+                "12": {"A": 0, "B": 0},
+                "15": {"A": 0, "B": 0},
+                "20": {"A": 0, "B": 0},
+                "25": {"A": 0, "B": 0},
+                "30": {"A": 0, "B": 0},
+                "40": {"A": 0, "B": 0}
+            },
+            "REAQUECIMENTO": {
+                "1":  {"E": 1400, "H": 3000, "EH": 4400, "X": 0},
+                "2":  {"E": 1750, "H": 3000, "EH": 4750, "X": 0},
+                "3":  {"E": 1900, "H": 3000, "EH": 4900, "X": 0},
+                "4":  {"E": 1950, "H": 3000, "EH": 4950, "X": 0},
+                "5":  {"E": 1950, "H": 3000, "EH": 4950, "X": 0},
+                "7":  {"E": 2400, "H": 3000, "EH": 5400, "X": 0},
+                "10": {"E": 3400, "H": 3000, "EH": 6400, "X": 0},
+                "12": {"E": 3700, "H": 3500, "EH": 7200, "X": 0},
+                "15": {"E": 4300, "H": 3500, "EH": 7800, "X": 0},
+                "20": {"E": 5000, "H": 4000, "EH": 9000, "X": 0},
+                "25": {"E": 5000, "H": 4000, "EH": 9000, "X": 0},
+                "30": {"E": 5400, "H": 4000, "EH": 9400, "X": 0},
+                "40": {"E": 6500, "H": 4000, "EH": 10500, "X": 0}
+            },
+            "UMIDIFICACAO": {
+                "1":  {"P": 5300, "U": 7100, "D": 3340, "PD": 8440, "X": 0},
+                "2":  {"P": 5300, "U": 8900, "D": 4525, "PD": 8825, "X": 0},
+                "3":  {"P": 5300, "U": 8900, "D": 4690, "PD": 9990, "X": 0},
+                "4":  {"P": 5300, "U": 8900, "D": 4745, "PD": 9945, "X": 0},
+                "5":  {"P": 5300, "U": 8900, "D": 4745, "PD": 9945, "X": 0},
+                "7":  {"P": 5300, "U": 12000, "D": 4240, "PD": 10055, "X": 0},
+                "10": {"P": 6800, "U": 12000, "D": 5240, "PD": 11040, "X": 0},
+                "12": {"P": 6800, "U": 12000, "D": 6010, "PD": 12810, "X": 0},
+                "15": {"P": 6800, "U": 12000, "D": 6230, "PD": 12030, "X": 0},
+                "20": {"P": 6800, "U": 12000, "D": 8000, "PD": 14800, "X": 0},
+                "25": {"P": 6800, "U": 12000, "D": 8000, "PD": 14800, "X": 0},
+                "30": {"P": 6800, "U": 20000, "D": 8440, "PD": 15240, "X": 0},
+                "40": {"P": 6800, "U": 20000, "D": 8800, "PD": 15600, "X": 0}
+            },
+            "DAMPER": {
+                "1":  {"D": 1650, "F": 1650, "P": 1400, "X": 0},
+                "2":  {"D": 1700, "F": 1700, "P": 1550, "X": 0},
+                "3":  {"D": 1700, "F": 1700, "P": 1550, "X": 0},
+                "4":  {"D": 1800, "F": 1800, "P": 1550, "X": 0},
+                "5":  {"D": 1800, "F": 1800, "P": 1550, "X": 0},
+                "7":  {"D": 2100, "F": 2100, "P": 1550, "X": 0},
+                "10": {"D": 2300, "F": 2300, "P": 1900, "X": 0},
+                "12": {"D": 5600, "F": 5600, "P": 1900, "X": 0},
+                "15": {"D": 5600, "F": 5600, "P": 2300, "X": 0},
+                "20": {"D": 8300, "F": 8300, "P": 2300, "X": 0},
+                "25": {"D": 8300, "F": 8300, "P": 2300, "X": 0},
+                "30": {"D": 9800, "F": 9800, "P": 2980, "X": 0},
+                "40": {"D": 10800, "F": 10800, "P": 2980, "X": 0}
+            },
+            "FILTRO DE AR": {
+                "1":  {"F": 240, "G": 0, "E":500},
+                "2":  {"F": 390, "G": 0, "E": 500},
+                "3":  {"F": 390, "G": 0, "E": 500},
+                "4":  {"F": 440, "G": 0, "E": 600},
+                "5":  {"F": 540, "G": 0, "E": 800},
+                "7":  {"F": 560, "G": 0, "E": 900},
+                "10": {"F": 1440, "G": 0, "E": 1000},
+                "12": {"F": 1440, "G": 0, "E": 1200},
+                "15": {"F": 1440, "G": 0, "E": 1400},
+                "20": {"F": 1440, "G": 0, "E": 1600},
+                "25": {"F": 1440, "G": 0, "E": 1800},
+                "30": {"F": 1920, "G": 0, "E": 1900},
+                "40": {"F": 1930, "G": 0, "E": 2200}
+            },
+            "VENTILADOR EVAPORADOR": {
+                "1":  {"P": 0, "R": 2300, "L": 1138.5},
+                "2":  {"P": 0, "R": 2800, "L": 1591.66},
+                "3":  {"P": 0, "R": 2800, "L": 1591.66},
+                "4":  {"P": 0, "R": 3400, "L": 1932.74},
+                "5":  {"P": 0, "R": 3400, "L": 1932.74},
+                "7":  {"P": 0, "R": 4100, "L": 1901.32},
+                "10": {"P": 0, "R": 4500, "L": 2086.82},
+                "12": {"P": 0, "R": 8200, "L": 4941.39},
+                "15": {"P": 0, "R": 8200, "L": 4941.39},
+                "20": {"P": 0, "R": 12100, "L": 8333.22},
+                "25": {"P": 0, "R": 12600, "L": 8677.57},
+                "30": {"P": 0, "R": 18200, "L": 9674.09},
+                "40": {"P": 0, "R": 19800, "L": 11840.13}
+            },
+            "ACABAMENTO": {
+                "1":  {"P": 0, "E": 2300, "I": 3859},
+                "2":  {"P": 0, "E": 3200, "I": 4159},
+                "3":  {"P": 0, "E": 3200, "I": 4159},
+                "4":  {"P": 0, "E": 3900, "I": 4159},
+                "5":  {"P": 0, "E": 3900, "I": 5159},
+                "7":  {"P": 0, "E": 5200, "I": 7550},
+                "10": {"P": 0, "E": 5500, "I": 7940},
+                "12": {"P": 0, "E": 8900, "I": 9295},
+                "15": {"P": 0, "E": 8900, "I": 9321}, // Adjusted for 15TR, assuming it's similar to 20TR
+                "20": {"P": 0, "E": 8900, "I": 9321},
+                "25": {"P": 0, "E": 9200, "I": 10140},
+                "30": {"P": 0, "E": 10900, "I": 12400},
+                "40": {"P": 0, "E": 13200, "I": 17000}
+            },
+            "CONTROLE DE CONDENSAÇÃO": {
+                "1":  {"F": 490, "P": 3900, "X": 0},
+                "2":  {"F": 490, "P": 3900, "X": 0},
+                "3":  {"F": 490, "P": 3900, "X": 0},
+                "4":  {"F": 490, "P": 3900, "X": 0},
+                "5":  {"F": 490, "P": 4100, "X": 0},
+                "7":  {"F": 490, "P": 4100, "X": 0},
+                "10": {"F": 490, "P": 4900, "X": 0},
+                "12": {"F": 980, "P": 4900, "X": 0},
+                "15": {"F": 980, "P": 5100, "X": 0},
+                "20": {"F": 980, "P": 5100, "X": 0},
+                "25": {"F": 980, "P": 6200, "X": 0},
+                "30": {"F": 980, "P": 6600, "X": 0},
+                "40": {"F": 980, "P": 8900, "X": 0}
+            },
+            "APLICACAO": { // Corrected key to match select option value
+                "1":  {"D": 0, "P": 0},
+                "2":  {"D": 0, "P": 0},
+                "3":  {"D": 0, "P": 0},
+                "4":  {"D": 0, "P": 0},
+                "5":  {"D": 0, "P": 0},
+                "7":  {"D": 0, "P": 0},
+                "10": {"D": 0, "P": 0},
+                "12": {"D": 0, "P": 0},
+                "15": {"D": 0, "P": 0},
+                "20": {"D": 0, "P": 0},
+                "25": {"D": 0, "P": 0},
+                "30": {"D": 0, "P": 0},
+                "40": {"D": 0, "P": 0}
+            },
+            "TIPO DE EQUIPAMENTO": {
+                "1":  {"P": 0, "E": 0},
+                "2":  {"P": 0, "E": 0},
+                "3":  {"P": 0, "E": 0},
+                "4":  {"P": 0, "E": 0},
+                "5":  {"P": 0, "E": 0},
+                "7":  {"P": 0, "E": 0},
+                "10": {"P": 0, "E": 0},
+                "12": {"P": 0, "E": 0},
+                "15": {"P": 0, "E": 0},
+                "20": {"P": 0, "E": 0},
+                "25": {"P": 0, "E": 0},
+                "30": {"P": 0, "E": 0},
+                "40": {"P": 0, "E": 0}
+            }
+        };
+
+        // Global variable for the cost database, initialized with default values
+        let costDatabase = { ...defaultCostDatabase };
+
+        // Load data from localStorage if it exists, otherwise use default
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('costDatabase');
+            if (savedData) {
+                costDatabase = JSON.parse(savedData);
+            } else {
+                // If no saved data, use the default data and save it
+                saveToLocalStorage();
+            }
+        }
+
+        function parsePartNumber() {
+            const fullPN = document.getElementById('fullPartNumber').value.trim();
+            if (!fullPN) return;
+            
+            const parts = fullPN.split('-');
+            if (parts.length !== 18) {
+                alert('Part Number inválido. Deve conter 18 partes separadas por hífen.');
+                return;
+            }
+            // Update each form field
+            document.getElementById('productLine').value = parts[0];
+            document.getElementById('mountType').value = parts[1];
+            document.getElementById('capacity').value = parts[2];
+            document.getElementById('insuflamento').value = parts[3];
+            document.getElementById('condensacao').value = parts[4];
+            document.getElementById('tensao').value = parts[5];
+            document.getElementById('controle').value = parts[6];
+            document.getElementById('compressor').value = parts[7];
+            document.getElementById('fluido').value = parts[8];
+            document.getElementById('reaquecimento').value = parts[9];
+            document.getElementById('umidificacao').value = parts[10];
+            document.getElementById('damper').value = parts[11];
+            document.getElementById('filtro').value = parts[12];
+            document.getElementById('ventilador').value = parts[13];
+            document.getElementById('acabamento').value = parts[14];
+            document.getElementById('controleCondensacao').value = parts[15];
+            document.getElementById('aplicacao').value = parts[16];
+            document.getElementById('tipoEquipamento').value = parts[17];
+            
+            // Update the displayed part number
+            updatePartNumber();
+            
+            alert('Configuração aplicada com sucesso!');
+        }
+
+        // Save data to localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('costDatabase', JSON.stringify(costDatabase));
+        }
+
+        // Clear local data
+        function clearLocalData() {
+            localStorage.removeItem('costDatabase');
+            costDatabase = { ...defaultCostDatabase }; // Reset to default in-memory database
+            alert('Dados locais limpos com sucesso! Os dados padrão serão carregados na próxima vez.');
+            showSelectedTable(); // Update the displayed table after clearing
+        }
+
+        // Update the part number
+        function updatePartNumber() {
+            const productLine = document.getElementById('productLine').value;
+            const mountType = document.getElementById('mountType').value;
+            const capacity = document.getElementById('capacity').value;
+            const insuflamento = document.getElementById('insuflamento').value;
+            const condensacao = document.getElementById('condensacao').value;
+            const tensao = document.getElementById('tensao').value;
+            const controle = document.getElementById('controle').value;
+            const compressor = document.getElementById('compressor').value;
+            const fluido = document.getElementById('fluido').value;
+            const reaquecimento = document.getElementById('reaquecimento').value;
+            const umidificacao = document.getElementById('umidificacao').value;
+            const damper = document.getElementById('damper').value;
+            const filtro = document.getElementById('filtro').value;
+            const ventilador = document.getElementById('ventilador').value;
+            const acabamento = document.getElementById('acabamento').value;
+            const controleCondensacao = document.getElementById('controleCondensacao').value;
+            const aplicacao = document.getElementById('aplicacao').value;
+            const tipoEquipamento = document.getElementById('tipoEquipamento').value;
+
+            const partNumber = `${productLine}-${mountType}-${capacity}-${insuflamento}-${condensacao}-${tensao}-${controle}-${compressor}-${fluido}-${reaquecimento}-${umidificacao}-${damper}-${filtro}-${ventilador}-${acabamento}-${controleCondensacao}-${aplicacao}-${tipoEquipamento}`;
+            
+            document.getElementById('partNumber').textContent = partNumber;
+        }
+
+        // Update costs when capacity changes
+        function updateCosts() {
+            // This function can be used to pre-calculate or update information when capacity changes
+        }
+
+        // Generate product description from part number
+        function generateProductDescription() {
+            const productLine = document.getElementById('productLine');
+            const mountType = document.getElementById('mountType');
+            const capacity = document.getElementById('capacity');
+            const insuflamento = document.getElementById('insuflamento');
+            const condensacao = document.getElementById('condensacao');
+            const tensao = document.getElementById('tensao');
+            const controle = document.getElementById('controle');
+            const compressor = document.getElementById('compressor');
+            const fluido = document.getElementById('fluido');
+            const reaquecimento = document.getElementById('reaquecimento');
+            const umidificacao = document.getElementById('umidificacao');
+            const damper = document.getElementById('damper');
+            const filtro = document.getElementById('filtro');
+            const ventilador = document.getElementById('ventilador');
+            const acabamento = document.getElementById('acabamento');
+            const controleCondensacao = document.getElementById('controleCondensacao');
+            const aplicacao = document.getElementById('aplicacao');
+            const tipoEquipamento = document.getElementById('tipoEquipamento');
+
+            // Get the selected text for each option
+            const productLineText = productLine.options[productLine.selectedIndex].text;
+            const mountTypeText = mountType.options[mountType.selectedIndex].text;
+            const capacityText = capacity.options[capacity.selectedIndex].text;
+            const insuflamentoText = insuflamento.options[insuflamento.selectedIndex].text;
+            const condensacaoText = condensacao.options[condensacao.selectedIndex].text;
+            const tensaoText = tensao.options[tensao.selectedIndex].text;
+            const controleText = controle.options[controle.selectedIndex].text;
+            const compressorText = compressor.options[compressor.selectedIndex].text;
+            const fluidoText = fluido.options[fluido.selectedIndex].text;
+            const reaquecimentoText = reaquecimento.options[reaquecimento.selectedIndex].text;
+            const umidificacaoText = umidificacao.options[umidificacao.selectedIndex].text;
+            const damperText = damper.options[damper.selectedIndex].text;
+            const filtroText = filtro.options[filtro.selectedIndex].text;
+            const ventiladorText = ventilador.options[ventilador.selectedIndex].text;
+            const acabamentoText = acabamento.options[acabamento.selectedIndex].text;
+            const controleCondensacaoText = controleCondensacao.options[controleCondensacao.selectedIndex].text;
+            const aplicacaoText = aplicacao.options[aplicacao.selectedIndex].text;
+            const tipoEquipamentoText = tipoEquipamento.options[tipoEquipamento.selectedIndex].text;
+
+            // Combine all descriptions
+            const description = [
+                productLineText,
+                mountTypeText,
+                capacityText,
+                insuflamentoText,
+                condensacaoText,
+                tensaoText,
+                controleText,
+                compressorText,
+                fluidoText,
+                reaquecimentoText,
+                umidificacaoText,
+                damperText,
+                filtroText,
+                ventiladorText,
+                acabamentoText,
+                controleCondensacaoText,
+                aplicacaoText,
+                tipoEquipamentoText
+            ].join(', ');
+
+            return description;
+        }
+
+        // Generate PDF with offer details
+function generatePDF() {
+    if (document.getElementById('finalPrice').textContent === 'R$ 0,00') {
+        alert('Por favor, calcule o preço antes de gerar o PDF.');
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setProperties({
+        title: `Oferta ${document.getElementById('offerNumber').value || ''}`,
+        subject: 'Cotação de equipamento WM/WMH',
+        author: 'MGE Air',
+        creator: 'Sistema de Cálculo de Preços MGE Air'
+    });
+
+    doc.setFontSize(16);
+    doc.setTextColor(40);
+    doc.setFont('helvetica', 'bold');
+    doc.text('MGE Air - Proposta Wall Mounted', 105, 15, { align: 'center' });
+    
+    doc.setDrawColor(200);
+    doc.setLineWidth(0.5);
+    doc.line(20, 20, 190, 20);
+    
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('pt-BR');
+    doc.setFontSize(10);
+    doc.text(`Data: ${dateStr}`, 20, 25);
+    
+    const customerName = document.getElementById('customerName').value || 'Não informado';
+    const companyName = document.getElementById('companyName').value || 'Não informado';
+    const offerNumber = document.getElementById('offerNumber').value || 'Não informado';
+    const customerAddress = document.getElementById('customerAddress').value || 'Não informado';
+    const customerEmail = document.getElementById('customerEmail').value || 'Não informado';
+    const customerPhone = document.getElementById('customerPhone').value || 'Não informado';
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Empresa: ${companyName}`, 20, 35);
+    doc.text(`Contato: ${customerName}`, 20, 40);
+    doc.text(`Endereço: ${customerAddress}`, 20, 45);
+    doc.text(`Email: ${customerEmail}`, 140, 30);
+    doc.text(`Telefone: ${customerPhone}`, 140, 35);
+    doc.text(`Oferta Nº: ${offerNumber}`, 140, 25);
+    doc.text(`Validade da oferta 10 dias`, 140, 45);
+
+    const partNumber = document.getElementById('partNumber').textContent;
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Detalhes do Produto', 20, 57);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Part Number: ${partNumber}`, 20, 62);
+    
+    // Create table data with labels and descriptions
+    const tableData = [
+        ['Linha de Produto', getSelectedOptionText('productLine')],
+        ['Tipo de Montagem', getSelectedOptionText('mountType')],
+        ['Capacidade (TR)', getSelectedOptionText('capacity')],
+        ['Insuflamento', getSelectedOptionText('insuflamento')],
+        ['Condensação', getSelectedOptionText('condensacao')],
+        ['Tensão de Alimentação', getSelectedOptionText('tensao')],
+        ['Controle', getSelectedOptionText('controle')],
+        ['Compressor', getSelectedOptionText('compressor')],
+        ['Fluido Refrigerante', getSelectedOptionText('fluido')],
+        ['Reaquecimento', getSelectedOptionText('reaquecimento')],
+        ['Umidificação', getSelectedOptionText('umidificacao')],
+        ['Damper', getSelectedOptionText('damper')],
+        ['Filtro de Ar', getSelectedOptionText('filtro')],
+        ['Ventilador Evaporador', getSelectedOptionText('ventilador')],
+        ['Acabamento', getSelectedOptionText('acabamento')],
+        ['Controle Condensação', getSelectedOptionText('controleCondensacao')],
+        ['Aplicação', getSelectedOptionText('aplicacao')],
+        ['Tipo de Equipamento', getSelectedOptionText('tipoEquipamento')]
+    ];
+    
+    doc.autoTable({
+        startY: 67,
+        head: [['Especificação', 'Descrição']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [41, 128, 185],
+            textColor: 255,
+            fontSize: 9
+        },
+        styles: {
+            fontSize: 8,
+            cellPadding: 3,
+            overflow: 'linebreak',
+            valign: 'middle'
+        },
+        columnStyles: {
+            0: { cellWidth: 50, fontStyle: 'bold' },
+            1: { cellWidth: 'auto' }
+        },
+        margin: { left: 20, right: 20 }
+    });
+    
+    const selectedPriceRadio = document.querySelector('input[name="selectedPrice"]:checked');
+    let priceLabelText = 'Preço Final (sem frete e sem DIFAL -  Consulte o valor do start up)';
+    let priceValueText = document.getElementById('finalPrice').textContent;
+
+    if (selectedPriceRadio) {
+        const selectedValue = selectedPriceRadio.value;
+        if (selectedValue === 'discount3') {
+            priceValueText = document.getElementById('discount3Price').textContent;
+        } else if (selectedValue === 'discount5') {
+            priceValueText = document.getElementById('discount5Price').textContent;
+        }
+    }
+    
+    const priceData = [[priceLabelText, priceValueText]];
+
+    doc.autoTable({
+        startY: doc.autoTable.previous.finalY + 10,
+        body: priceData,
+        theme: 'grid',
+        styles: {
+            cellPadding: 5,
+            fontSize: 9,
+            fontStyle: 'bold'
+        },
+        margin: { left: 20, right: 20 }
+    });
+    
+    const offerNotes = document.getElementById('offerNotes').value;
+    if (offerNotes) {
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Observações:', 20, doc.autoTable.previous.finalY + 15);
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        const splitNotes = doc.splitTextToSize(offerNotes, 170);
+        doc.text(splitNotes, 20, doc.autoTable.previous.finalY + 22);
+    }
+    
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text('Rodovia Dom Gabriel Paulino Bueno Couto Km 83 + 284 SN, Galpão 02', 
+             105, doc.internal.pageSize.height - 20, { align: 'center' });
+    doc.text('Pinhal, Cabreúva - SP, 13317-204  +55 11 4529-5178', 
+             105, doc.internal.pageSize.height - 15, { align: 'center' });
+    doc.text('Este documento foi gerado automaticamente pelo Sistema de Cálculo de Preços MGE Air', 
+             105, doc.internal.pageSize.height - 10, { align: 'center' });
+    
+    const fileName = `Oferta_${offerNumber || partNumber}_${customerName.replace(/ /g, '_')}_${dateStr.replace(/\//g, '-')}.pdf`;
+    doc.save(fileName);
+}
+
+// Helper function to get the text of the selected option
+function getSelectedOptionText(selectId) {
+    const selectElement = document.getElementById(selectId);
+    return selectElement.options[selectElement.selectedIndex].text;
+}
+        // Export to Excel function (REVISED)
+        function exportToExcel() {
+    if (document.getElementById('finalPrice').textContent === 'R$ 0,00') {
+        alert('Por favor, calcule o preço antes de exportar para Excel.');
+        return;
+    }
+
+    const wb = XLSX.utils.book_new();
+    
+    // --- Sheet 1: Informações da Oferta ---
+    const customerName = document.getElementById('customerName').value || 'Não informado';
+    const companyName = document.getElementById('companyName').value || 'Não informado';
+    const offerNumber = document.getElementById('offerNumber').value || 'Não informado';
+    const partNumber = document.getElementById('partNumber').textContent;
+    const offerNotes = document.getElementById('offerNotes').value || 'Nenhuma observação';
+
+    const offerData = [
+        ["Informações da Oferta"],
+        [],
+        ["Cliente:", customerName],
+        ["Empresa:", companyName],
+        ["Oferta Nº:", offerNumber],
+        ["Part Number:", partNumber],
+        [],
+        ["Validade da oferta:", "10 dias"],
+        [],
+        ["Observações:", offerNotes]
+    ];
+    const offerWS = XLSX.utils.aoa_to_sheet(offerData);
+    offerWS['!cols'] = [{wch: 20}, {wch: 50}];
+    XLSX.utils.book_append_sheet(wb, offerWS, "Oferta");
+
+    // --- Sheet 2: Detalhes do Produto ---
+    const description = generateProductDescription();
+    const productDetails = description.split(', ');
+    const productData = [["Componente", "Seleção"]];
+    
+    productDetails.forEach(detail => {
+        const trimmedDetail = detail.trim();
+        if (trimmedDetail) {
+            const dashIndex = trimmedDetail.indexOf(' - ');
+            if (dashIndex > -1) {
+                const component = trimmedDetail.substring(0, dashIndex).trim();
+                const selection = trimmedDetail.substring(dashIndex + 3).trim();
+                productData.push([component, selection]);
+            } else {
+                productData.push(['', trimmedDetail]);
+            }
+        }
+    });
+    const productWS = XLSX.utils.aoa_to_sheet(productData);
+    productWS['!cols'] = [{wch: 30}, {wch: 50}];
+    XLSX.utils.book_append_sheet(wb, productWS, "Detalhes do Produto");
+
+    // --- Sheet 3: Detalhes do Preço ---
+    const costBreakdown = document.getElementById('costBreakdown');
+    const priceData = [["Item", "Valor"]];
+    
+    // Add all items from cost breakdown
+    if (costBreakdown) {
+        const items = costBreakdown.querySelectorAll('.result-item');
+        items.forEach(item => {
+            const spans = item.querySelectorAll('span');
+            if (spans.length >= 2) {
+                const label = spans[0].textContent.trim();
+                const value = spans[1].textContent.trim();
+                priceData.push([label, value]);
+            }
+        });
+    }
+    
+    // Determine which price is selected
+    const selectedPriceRadio = document.querySelector('input[name="selectedPrice"]:checked');
+    let priceLabel = "Preço Final (sem frete nem DIFAL)";
+    let priceValue = document.getElementById('finalPrice').textContent;
+
+    if (selectedPriceRadio) {
+        if (selectedPriceRadio.value === 'discount3') {
+            priceLabel = "Preço com 3% de desconto";
+            priceValue = document.getElementById('discount3Price').textContent;
+        } else if (selectedPriceRadio.value === 'discount5') {
+            priceLabel = "Preço com 5% de desconto";
+            priceValue = document.getElementById('discount5Price').textContent;
+        }
+    }
+
+    // Add only the selected price
+    priceData.push([]);
+    priceData.push([priceLabel + ":", priceValue]);
+    priceData.push(["Validade da oferta:", "10 dias"]);
+
+    const priceWS = XLSX.utils.aoa_to_sheet(priceData);
+    priceWS['!cols'] = [{wch: 40}, {wch: 20}];
+    XLSX.utils.book_append_sheet(wb, priceWS, "Detalhamento de Preço");
+    
+    // --- Generate and Save File ---
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('pt-BR').replace(/\//g, '-');
+    const fileName = `Oferta_${offerNumber || partNumber}_${customerName.replace(/ /g, '_')}_${dateStr}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+
+}
+
+        // Calculate final price
+        function calculatePrice() {
+            // Get selected values
+            const capacity = document.getElementById('capacity').value;
+            const mountType = document.getElementById('mountType').value;
+            const insuflamento = document.getElementById('insuflamento').value;
+            const condensacao = document.getElementById('condensacao').value;
+            const tensao = document.getElementById('tensao').value;
+            const controle = document.getElementById('controle').value;
+            const compressor = document.getElementById('compressor').value;
+            const fluido = document.getElementById('fluido').value;
+            const reaquecimento = document.getElementById('reaquecimento').value;
+            const umidificacao = document.getElementById('umidificacao').value;
+            const damper = document.getElementById('damper').value;
+            const filtro = document.getElementById('filtro').value;
+            const ventilador = document.getElementById('ventilador').value;
+            const acabamento = document.getElementById('acabamento').value;
+            const controleCondensacao = document.getElementById('controleCondensacao').value;
+            const aplicacao = document.getElementById('aplicacao').value;
+            const tipoEquipamento = document.getElementById('tipoEquipamento').value;
+            
+            // Get tax values
+            const pis = parseFloat(document.getElementById('pis').value) / 100;
+            const cofins = parseFloat(document.getElementById('cofins').value) / 100;
+            const icms = parseFloat(document.getElementById('icms').value) / 100;
+            const irpj = parseFloat(document.getElementById('irpj').value) / 100;
+            const csll = parseFloat(document.getElementById('csll').value) / 100;
+            const ipi = parseFloat(document.getElementById('ipi').value) / 100;
+            const comissao = parseFloat(document.getElementById('comissao').value) / 100;
+            const outros = parseFloat(document.getElementById('outros').value) / 100;
+            
+            // Calculate base cost from database
+            let baseCost = costDatabase["CAPACIDADE"][capacity] || 0;
+            
+            // Add all additional costs
+            baseCost += costDatabase["TIPO DE MONTAGEM"][capacity][mountType] || 0;
+            baseCost += costDatabase["INSUFLAMENTO"][capacity][insuflamento] || 0;
+            baseCost += costDatabase["CONDENSAÇÃO"][capacity][condensacao] || 0;
+            baseCost += costDatabase["TENSÃO ALIMENTAÇÃO"][capacity][tensao] || 0;
+            baseCost += costDatabase["CONTROLE"][capacity][controle] || 0;
+            baseCost += costDatabase["COMPRESSOR"][capacity][compressor] || 0;
+            baseCost += costDatabase["FLUIDO REFRIGERANTE"][capacity][fluido] || 0;
+            baseCost += costDatabase["REAQUECIMENTO"][capacity][reaquecimento] || 0;
+            baseCost += costDatabase["UMIDIFICACAO"][capacity][umidificacao] || 0; // Corrected key
+            baseCost += costDatabase["DAMPER"][capacity][damper] || 0;
+            baseCost += costDatabase["FILTRO DE AR"][capacity][filtro] || 0;
+            baseCost += costDatabase["VENTILADOR EVAPORADOR"][capacity][ventilador] || 0;
+            baseCost += costDatabase["ACABAMENTO"][capacity][acabamento] || 0;
+            baseCost += costDatabase["CONTROLE DE CONDENSAÇÃO"][controleCondensacao] || 0;
+            baseCost += costDatabase["APLICACAO"][capacity][aplicacao] || 0; // Corrected key
+            baseCost += costDatabase["TIPO DE EQUIPAMENTO"][capacity][tipoEquipamento] || 0;
+            
+            // Calculate taxes and margins
+            const taxTotal = pis + cofins + icms + irpj + csll + ipi;
+            const marginTotal = comissao + outros;
+            
+            // Calculate final price
+   const finalPrice = baseCost * (1 + taxTotal) / (1 - marginTotal);
+        
+        // Get price raise percentages
+        const raise2026 = parseFloat(document.getElementById('priceRaise2026').value) / 100;
+        const raise2027 = parseFloat(document.getElementById('priceRaise2027').value) / 100;
+        const raise2028 = parseFloat(document.getElementById('priceRaise2028').value) / 100;
+        
+        // Calculate raised prices
+        const price2026 = finalPrice * (1 + raise2026);
+        const price2027 = price2026 * (1 + raise2027);
+        const price2028 = price2027 * (1 + raise2028);
+        
+        // Determine which price to show as "final price"
+        let displayPrice = finalPrice;
+        let displayLabel = "Preço Final (sem frete nem DIFAL)";
+
+
+    // Calculate discount prices
+    const discount3Price = displayPrice * 0.97;
+    const discount5Price = displayPrice * 0.95;
+    
+    // Update discount price displays
+    document.getElementById('discount3Price').textContent = formatCurrency(discount3Price);
+    document.getElementById('discount5Price').textContent = formatCurrency(discount5Price);
+
+
+
+
+        
+        if (raise2028 > 0) {
+            displayPrice = price2028;
+            displayLabel = "Preço Final 2028";
+        } else if (raise2027 > 0) {
+            displayPrice = price2027;
+            displayLabel = "Preço Final 2027";
+        } else if (raise2026 > 0) {
+            displayPrice = price2026;
+            displayLabel = "Preço Final 2026";
+        }
+        
+        // Display results
+        const costBreakdown = document.getElementById('costBreakdown');
+        costBreakdown.innerHTML = `
+            <div class="result-item">
+                <span>Custo Base:</span>
+                <span>${formatCurrency(baseCost)}</span>
+            </div>
+            <div class="result-item">
+                <span>PIS (${(pis*100).toFixed(2)}%):</span>
+                <span>${formatCurrency(baseCost * pis)}</span>
+            </div>
+            <div class="result-item">
+                <span>COFINS (${(cofins*100).toFixed(2)}%):</span>
+                <span>${formatCurrency(baseCost * cofins)}</span>
+            </div>
+            <div class="result-item">
+                <span>ICMS (${(icms*100).toFixed(2)}%):</span>
+                <span>${formatCurrency(baseCost * icms)}</span>
+            </div>
+            <div class="result-item">
+                <span>IRPJ (${(irpj*100).toFixed(2)}%):</span>
+                <span>${formatCurrency(baseCost * irpj)}</span>
+            </div>
+            <div class="result-item">
+                <span>CSLL (${(csll*100).toFixed(2)}%):</span>
+                <span>${formatCurrency(baseCost * csll)}</span>
+            </div>
+            <div class="result-item">
+                <span>IPI (${(ipi*100).toFixed(2)}%):</span>
+                <span>${formatCurrency(baseCost * ipi)}</span>
+            </div>
+            <div class="result-item">
+                <span>Comissão (${(comissao*100).toFixed(2)}%):</span>
+                <span>${formatCurrency(finalPrice * comissao)}</span>
+            </div>
+            <div class="result-item">
+                <span>Outros (${(outros*100).toFixed(2)}%):</span>
+                <span>${formatCurrency(finalPrice * outros)}</span>
+            </div>
+            ${raise2026 > 0 ? `
+            <div class="result-item">
+                <span>Preço 2026 (${(raise2026*100).toFixed(2)}% aumento):</span>
+                <span>${formatCurrency(price2026)}</span>
+            </div>` : ''}
+            ${raise2027 > 0 ? `
+            <div class="result-item">
+                <span>Preço 2027 (${(raise2027*100).toFixed(2)}% aumento cumulativo):</span>
+                <span>${formatCurrency(price2027)}</span>
+            </div>` : ''}
+            ${raise2028 > 0 ? `
+            <div class="result-item">
+                <span>Preço 2028 (${(raise2028*100).toFixed(2)}% aumento cumulativo):</span>
+                <span>${formatCurrency(price2028)}</span>
+            </div>` : ''}
+        `;
+        
+        // Update the final price display with the appropriate year's price
+        document.getElementById('finalPrice').textContent = formatCurrency(displayPrice);
+        document.getElementById('resultSection').style.display = 'block';
+        
+        // Also update the label for the final price
+        const finalPriceLabel = document.querySelector('.result-total span:first-child');
+        if (finalPriceLabel) {
+            finalPriceLabel.textContent = displayLabel + ":";
+        }
+    }
+
+        // Format currency for display
+        function formatCurrency(value) {
+            return 'R$ ' + value.toFixed(2).replace('.', ',').replace(/(\d)(?=(\d{3})+\,)/g, '$1.');
+        }
+        
+        // Show selected table in database tab
+        function showSelectedTable() {
+    const tableName = document.getElementById('dataTableSelect').value;
+    const tableData = costDatabase[tableName];
+    const container = document.getElementById('dataTableContainer');
+    
+    if (!tableData) {
+        container.innerHTML = '<p>Nenhum dado disponível para esta tabela.</p>';
+        return;
+    }
+    
+    let html = `<h3>${tableName}</h3><table><thead><tr>`;
+    
+    // Special handling for tables that have capacity-based sub-keys
+    if (tableName === "TIPO DE MONTAGEM" || tableName === "INSUFLAMENTO" || 
+        tableName === "CONDENSAÇÃO" || tableName === "TENSÃO ALIMENTAÇÃO" || 
+        tableName === "CONTROLE" || tableName === "COMPRESSOR" || 
+        tableName === "FLUIDO REFRIGERANTE" || tableName === "REAQUECIMENTO" || 
+        tableName === "UMIDIFICACAO" || tableName === "DAMPER" || 
+        tableName === "FILTRO DE AR" || tableName === "VENTILADOR EVAPORADOR" || 
+        tableName === "ACABAMENTO" || tableName === "CONTROLE DE CONDENSAÇÃO" || 
+        tableName === "APLICACAO" || tableName === "TIPO DE EQUIPAMENTO") {
+        
+        // Get all sub-keys from the first capacity entry
+        const firstCapacity = Object.keys(tableData)[0];
+        const subKeys = Object.keys(tableData[firstCapacity]);
+        
+        // Create header row
+        html += `<th>Capacidade (TR)</th>`;
+        subKeys.forEach(key => {
+            html += `<th>${key}</th>`;
+        });
+        html += `</tr></thead><tbody>`;
+        
+        // Create data rows
+        Object.keys(tableData).forEach(capacity => {
+            html += `<tr><td>${capacity}</td>`;
+            subKeys.forEach(key => {
+                const value = tableData[capacity][key];
+                html += `<td>${value !== 0 ? formatCurrency(value) : '-'}</td>`;
+            });
+            html += `</tr>`;
+        });
+    } 
+    // Special handling for CAPACIDADE table
+    else if (tableName === "CAPACIDADE") {
+        html += `<th>Capacidade (TR)</th><th>Valor Base</th></tr></thead><tbody>`;
+        Object.keys(tableData).forEach(capacity => {
+            html += `<tr><td>${capacity}</td><td>${formatCurrency(tableData[capacity])}</td></tr>`;
+        });
+    }
+    // Default handling for other tables
+    else {
+        html += `<th>Chave</th><th>Valor</th></tr></thead><tbody>`;
+        Object.keys(tableData).forEach(key => {
+            html += `<tr><td>${key}</td><td>${formatCurrency(tableData[key])}</td></tr>`;
+        });
+    }
+    
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+        
+        // Initialize the application
+        function init() {
+    loadFromLocalStorage();
+    updatePartNumber();
+    
+    // Initialize tabs
+    document.getElementById('calculator').className = "tab-content active";
+    document.getElementById('database').className = "tab-content";
+    
+    // Force show the first table when loading the database tab
+    if (window.location.hash === '#database') {
+        openTab(null, 'database');
+        document.getElementById('dataTableSelect').selectedIndex = 0;
+        showSelectedTable();
+    }
+}
+        // Run initialization when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
